@@ -2,7 +2,6 @@
 #define CAFFE_MOBILE_HPP_
 
 #include <string>
-<<<<<<< HEAD
 #include <vector>
 #include "caffe/caffe.hpp"
 #include <opencv2/core/core.hpp>
@@ -48,26 +47,6 @@ private:
   int num_channels_;
   cv::Mat mean_;
   float scale_;
-=======
-#include "caffe/caffe.hpp"
-
-using std::string;
-
-namespace caffe {
-
-class CaffeMobile
-{
-public:
-	CaffeMobile(string model_path, string weights_path);
-	~CaffeMobile();
-
-	int test(string img_path);
-
-	vector<int> predict_top_k(string img_path, int k=3);
-
-private:
-	Net<float> *caffe_net;
->>>>>>> 25d8ecc... Added jni lib for android
 };
 
 } // namespace caffe

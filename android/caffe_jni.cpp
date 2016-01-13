@@ -13,9 +13,18 @@
 #include "caffe/caffe.hpp"
 #include "caffe_mobile.hpp"
 
+#define  LOG_TAG    "CAFFE_JNI"
+#define  LOGV(...)  __android_log_print(ANDROID_LOG_VERBOSE,LOG_TAG, __VA_ARGS__)
+#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG, __VA_ARGS__)
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG, __VA_ARGS__)
+#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG, __VA_ARGS__)
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+static caffe::CaffeMobile *caffe_mobile;
 
 using std::string;
 using std::vector;
@@ -35,7 +44,7 @@ string jstring2string(JNIEnv *env, jstring jstr) {
 }
 
 JNIEXPORT void JNICALL
-Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_setNumThreads(
+Java_com_tenimaging_android_caffe_CaffeMobile_setNumThreads(
     JNIEnv *env, jobject thiz, jint numThreads) {
   int num_threads = numThreads;
 #ifdef USE_EIGEN
@@ -46,11 +55,11 @@ Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_setNumThreads(
 }
 
 JNIEXPORT void JNICALL
-Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_enableLog(JNIEnv *env,
+Java_com_tenimaging_android_caffe_CaffeMobile_enableLog(JNIEnv *env,
                                                          jobject thiz,
                                                          jboolean enabled) {}
 
-JNIEXPORT jint JNICALL Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_loadModel(
+JNIEXPORT jint JNICALL Java_com_tenimaging_android_caffe_CaffeMobile_loadModel(
     JNIEnv *env, jobject thiz, jstring modelPath, jstring weightsPath) {
   CaffeMobile::Get(jstring2string(env, modelPath),
                    jstring2string(env, weightsPath));
@@ -58,14 +67,14 @@ JNIEXPORT jint JNICALL Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_loadModel(
 }
 
 JNIEXPORT void JNICALL
-Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_setMeanWithMeanFile(
+Java_com_tenimaging_android_caffe_CaffeMobile_setMeanWithMeanFile(
     JNIEnv *env, jobject thiz, jstring meanFile) {
   CaffeMobile *caffe_mobile = CaffeMobile::Get();
   caffe_mobile->SetMean(jstring2string(env, meanFile));
 }
 
 JNIEXPORT void JNICALL
-Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_setMeanWithMeanValues(
+Java_com_tenimaging_android_caffe_CaffeMobile_setMeanWithMeanValues(
     JNIEnv *env, jobject thiz, jfloatArray meanValues) {
   CaffeMobile *caffe_mobile = CaffeMobile::Get();
   int num_channels = env->GetArrayLength(meanValues);
@@ -75,34 +84,57 @@ Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_setMeanWithMeanValues(
 }
 
 JNIEXPORT void JNICALL
-Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_setScale(JNIEnv *env,
+Java_com_tenimaging_android_caffe_CaffeMobile_setScale(JNIEnv *env,
                                                         jobject thiz,
                                                         jfloat scale) {
   CaffeMobile *caffe_mobile = CaffeMobile::Get();
   caffe_mobile->SetScale(scale);
 }
 
-JNIEXPORT jintArray JNICALL
-Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_predictImage(JNIEnv *env,
-                                                            jobject thiz,
-                                                            jstring imgPath,
-                                                            jint k) {
-  CaffeMobile *caffe_mobile = CaffeMobile::Get();
-  vector<int> top_k =
-      caffe_mobile->PredictTopK(jstring2string(env, imgPath), k);
+jint JNIEXPORT JNICALL
+Java_com_tenimaging_android_camera0_CaffeMobile_predictImagePath(JNIEnv* env, jobject thiz, jstring imgPath)
+{
+    const char *img_path = env->GetStringUTFChars(imgPath, 0);
+    caffe::vector<caffe::caffe_result> top_k = caffe_mobile->predict_top_k(string(img_path), 3);
+    LOGD("top-1 result: %d %f", top_k[0].synset,top_k[0].prob);
+        
+    env->ReleaseStringUTFChars(imgPath, img_path);
+    //TODO return probability
+    return top_k[0].synset;
+}
 
-  jintArray result;
-  result = env->NewIntArray(k);
-  if (result == NULL) {
-    return NULL; /* out of memory error thrown */
-  }
-  // move from the temp structure to the java structure
-  env->SetIntArrayRegion(result, 0, k, &top_k[0]);
-  return result;
+jint JNIEXPORT JNICALL
+Java_com_tenimaging_android_caffe_CaffeMobile_predictImage(JNIEnv* env, jobject thiz, jlong cvmat_img, jint numResults, jintArray synsetList, jfloatArray probList)
+{
+    cv::Mat& cv_img = *(cv::Mat*)(cvmat_img);
+    caffe::vector<caffe::caffe_result> top_k = caffe_mobile->predict_top_k(cv_img, numResults);
+    LOGD("top-1 result: %d %f", top_k[0].synset,top_k[0].prob);
+
+    jint *c_synsetList;
+    c_synsetList = (env)->GetIntArrayElements(synsetList,NULL);
+    jfloat *c_probList;
+    c_probList = (env)->GetFloatArrayElements(probList,NULL);
+    
+    if (c_synsetList == NULL || c_probList == NULL){
+        LOGE("Error getting array");
+        return -1;
+    }
+    
+    for (int i=0; i<numResults; i++)
+    {
+        c_synsetList[i] = top_k[i].synset;
+        c_probList[i]   = top_k[i].prob;
+    }
+    
+    // release the memory so java can have it again
+    (env)->ReleaseIntArrayElements(synsetList, c_synsetList,0);
+    (env)->ReleaseFloatArrayElements(probList, c_probList,0);
+
+    return top_k[0].synset;
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_com_sh1r0_caffe_1android_1lib_CaffeMobile_extractFeatures(
+Java_com_tenimaging_android_caffe_CaffeMobile_extractFeatures(
     JNIEnv *env, jobject thiz, jstring imgPath, jstring blobNames) {
   CaffeMobile *caffe_mobile = CaffeMobile::Get();
   vector<vector<float>> features = caffe_mobile->ExtractFeatures(

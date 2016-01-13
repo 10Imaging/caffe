@@ -5,11 +5,18 @@
 #include <vector>
 #include "caffe/caffe.hpp"
 #include <opencv2/core/core.hpp>
-
+#include <opencv2/imgproc/imgproc.hpp>
+     
 using std::string;
 using std::vector;
 
 namespace caffe {
+
+class caffe_result {
+public:
+    int synset;
+    float prob;
+};
 
 class CaffeMobile {
 public:
@@ -24,7 +31,9 @@ public:
 
   void SetScale(const float scale);
 
-  vector<int> PredictTopK(const string &img_path, int k);
+  //Image in should be RGB (3 channels)
+  vector<caffe_result> predict_top_k(cv::Mat& cv_img, int k=3);  
+  vector<caffe_result> predict_top_k(string img_path, int k=3);
 
   vector<vector<float>> ExtractFeatures(const string &img_path,
                                         const string &str_blob_names);

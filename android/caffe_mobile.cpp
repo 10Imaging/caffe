@@ -2,16 +2,24 @@
 #include <string>
 #include <vector>
 
+#include <android/log.h>
+
 #include "boost/algorithm/string.hpp"
 
 #include "caffe/caffe.hpp"
 #include "caffe/layers/memory_data_layer.hpp"
-
 #include "caffe_mobile.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#define  LOG_TAG    "CAFFE_MOBILE"
+#define  LOGV(...)  __android_log_print(ANDROID_LOG_VERBOSE,LOG_TAG, __VA_ARGS__)
+#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG, __VA_ARGS__)
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG, __VA_ARGS__)
+#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG, __VA_ARGS__)
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
 
 using std::clock;
 using std::clock_t;
@@ -25,6 +33,14 @@ using caffe::Net;
 using caffe::MemoryDataLayer;
 
 namespace caffe {
+
+template <typename T>
+vector<size_t> ordered(vector<T> const& values) {
+    vector<size_t> indices(values.size());
+    std::iota(begin(indices), end(indices), static_cast<size_t>(0));
+    std::sort( begin(indices), end(indices), [&](size_t a, size_t b) { return values[a] > values[b]; } );
+    return indices;
+}
 
 template <typename T> vector<int> argmax(vector<T> const &values, int N) {
   vector<size_t> indices(values.size());
@@ -218,11 +234,12 @@ vector<float> CaffeMobile::Forward(const string &filename) {
   return vector<float>(begin, end);
 }
 
+/*
 vector<int> CaffeMobile::PredictTopK(const string &img_path, int k) {
   const vector<float> probs = Forward(img_path);
   k = std::min<int>(std::max(k, 1), probs.size());
   return argmax(probs, k);
-}
+} */
 
 vector<vector<float>>
 CaffeMobile::ExtractFeatures(const string &img_path,
@@ -248,8 +265,73 @@ CaffeMobile::ExtractFeatures(const string &img_path,
   return features;
 }
 
+vector<caffe_result> create_results(vector<int>indices, vector<float>probs, int k){
+    vector<caffe_result> results(k);
+    for (int i=0; i<k; i++)
+    {
+        results[i].synset = indices[i];
+        results[i].prob = probs[indices[i]];
+    }
+    return results;
+}
+
+vector<caffe_result> CaffeMobile::predict_top_k(string img_path, int k) {
+    CHECK(net_ != NULL);
+        
+    Datum datum;
+    CHECK(ReadImageToDatum(img_path, 0, 256, 256, true, &datum));
+    const shared_ptr<MemoryDataLayer<float>> memory_data_layer =
+        boost::static_pointer_cast<MemoryDataLayer<float>>(net_->layer_by_name("data"));
+    memory_data_layer->AddDatumVector(vector<Datum>({datum}));
+            
+    float loss;
+    vector<Blob<float>* > dummy_bottom_vec;
+    clock_t t_start = clock();
+    const vector<Blob<float>*>& result = net_->Forward(dummy_bottom_vec, &loss);
+    clock_t t_end = clock();
+    //LOG(DEBUG) << "Prediction time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC << " ms.";
+            
+    const vector<float> probs = vector<float>(result[1]->cpu_data(), result[1]->cpu_data() + result[1]->count());
+    CHECK_LE(k, probs.size());
+    vector<size_t> sorted_index = ordered(probs);
+            
+    const vector<int> indices = vector<int>(sorted_index.begin(), sorted_index.begin() + k);
+    return create_results(indices,probs,k);
+}
+
+//Image in should be RGB (3 channels)
+vector<caffe_result> CaffeMobile::predict_top_k(cv::Mat& cv_img, int k) {
+    CHECK(net_ != NULL);
+            
+    Datum datum;
+    cv::Mat cv_img256;
+    
+    //Resize image to 256x256 which is expected by current net
+    cv::resize(cv_img,cv_img256,cv::Size(256,256));
+
+    CVMatToDatum(cv_img256, &datum);
+    const shared_ptr<MemoryDataLayer<float>> memory_data_layer =
+        boost::static_pointer_cast<MemoryDataLayer<float>>(net_->layer_by_name("data"));
+    memory_data_layer->AddDatumVector(vector<Datum>({datum}));
+                
+    float loss;
+    vector<Blob<float>* > dummy_bottom_vec;
+    clock_t t_start = clock();
+    const vector<Blob<float>*>& result = net_->Forward(dummy_bottom_vec, &loss);
+    clock_t t_end = clock();
+    //LOG(DEBUG) << "Prediction time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC << " ms.";
+                
+    const vector<float> probs = vector<float>(result[1]->cpu_data(), result[1]->cpu_data() + result[1]->count());
+    CHECK_LE(k, probs.size());
+    vector<size_t> sorted_index = ordered(probs);
+                
+    const vector<int> indices = vector<int>(sorted_index.begin(), sorted_index.begin() + k);
+    return create_results(indices,probs,k);
+}
+
 } // namespace caffe
 
+/*
 using caffe::CaffeMobile;
 
 int main(int argc, char const *argv[]) {
@@ -268,3 +350,4 @@ int main(int argc, char const *argv[]) {
   }
   return 0;
 }
+*/

@@ -94,6 +94,7 @@ Java_com_tenimaging_android_caffe_CaffeMobile_setScale(JNIEnv *env,
 jint JNIEXPORT JNICALL
 Java_com_tenimaging_android_caffe_CaffeMobile_predictImagePath(JNIEnv* env, jobject thiz, jstring imgPath)
 {
+    CaffeMobile *caffe_mobile = CaffeMobile::Get();
     const char *img_path = env->GetStringUTFChars(imgPath, 0);
     caffe::vector<caffe::caffe_result> top_k = caffe_mobile->predict_top_k(string(img_path), 3);
     LOGD("top-1 result: %d %f", top_k[0].synset,top_k[0].prob);
@@ -106,6 +107,7 @@ Java_com_tenimaging_android_caffe_CaffeMobile_predictImagePath(JNIEnv* env, jobj
 jint JNIEXPORT JNICALL
 Java_com_tenimaging_android_caffe_CaffeMobile_predictImage(JNIEnv* env, jobject thiz, jlong cvmat_img, jint numResults, jintArray synsetList, jfloatArray probList)
 {
+    CaffeMobile *caffe_mobile = CaffeMobile::Get();
     cv::Mat& cv_img = *(cv::Mat*)(cvmat_img);
     caffe::vector<caffe::caffe_result> top_k = caffe_mobile->predict_top_k(cv_img, numResults);
     LOGD("top-1 result: %d %f", top_k[0].synset,top_k[0].prob);

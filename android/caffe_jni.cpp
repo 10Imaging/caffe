@@ -92,7 +92,7 @@ Java_com_tenimaging_android_caffe_CaffeMobile_setScale(JNIEnv *env,
 }
 
 jint JNIEXPORT JNICALL
-Java_com_tenimaging_android_camera0_CaffeMobile_predictImagePath(JNIEnv* env, jobject thiz, jstring imgPath)
+Java_com_tenimaging_android_caffe_CaffeMobile_predictImagePath(JNIEnv* env, jobject thiz, jstring imgPath)
 {
     const char *img_path = env->GetStringUTFChars(imgPath, 0);
     caffe::vector<caffe::caffe_result> top_k = caffe_mobile->predict_top_k(string(img_path), 3);

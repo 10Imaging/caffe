@@ -90,21 +90,35 @@ Java_com_tenimaging_android_caffe_CaffeMobile_setScale(JNIEnv *env,
 }
 
     
-JNIEXPORT jintArray JNICALL
-Java_com_tenimaging_android_caffe_CaffeMobile_predictImagePath(JNIEnv* env, jobject thiz, jstring imgPath,jint k)
+jint JNIEXPORT JNICALL
+Java_com_tenimaging_android_caffe_CaffeMobile_predictImagePath(JNIEnv* env, jobject thiz, jstring imgPath, jint numResults, jintArray synsetList, jfloatArray probList)
 {
     CaffeMobile *caffe_mobile = CaffeMobile::Get();
-
-    vector<int> top_k = caffe_mobile->PredictTopK(jstring2string(env, imgPath), k);
-    jintArray result;
-    result = env->NewIntArray(k);
-    if (result == NULL) {
-        LOGE("Error allocating result array");
-        return NULL; // out of memory error thrown
+    caffe::vector<caffe::caffe_result> top_k = caffe_mobile->PredictTopK(jstring2string(env, imgPath), numResults);
+    LOGD("top result: %d %f", top_k[0].synset,top_k[0].prob);
+    
+    jint *c_synsetList;
+    c_synsetList = (env)->GetIntArrayElements(synsetList,NULL);
+    jfloat *c_probList;
+    c_probList = (env)->GetFloatArrayElements(probList,NULL);
+    
+    if (c_synsetList == NULL || c_probList == NULL){
+        LOGE("Error getting array");
+        return -1;
     }
-    // move from the temp structure to the java structure
-    env->SetIntArrayRegion(result, 0, k, &top_k[0]);
-    return result;
+    
+    for (int i=0; i<numResults; i++)
+    {
+        c_synsetList[i] = top_k[i].synset;
+        c_probList[i]   = top_k[i].prob;
+    }
+    
+    // release the memory so java can have it again
+    (env)->ReleaseIntArrayElements(synsetList, c_synsetList,0);
+    (env)->ReleaseFloatArrayElements(probList, c_probList,0);
+    
+    return top_k[0].synset;
+
 }
     
 jint JNIEXPORT JNICALL

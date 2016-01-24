@@ -149,6 +149,7 @@ void CaffeMobile::Preprocess(const cv::Mat &img,
                              std::vector<cv::Mat> *input_channels) {
   /* Convert the input image to the input image format of the network. */
   cv::Mat sample;
+
   if (img.channels() == 3 && num_channels_ == 1)
     cv::cvtColor(img, sample, cv::COLOR_BGR2GRAY);
   else if (img.channels() == 4 && num_channels_ == 1)
@@ -159,6 +160,7 @@ void CaffeMobile::Preprocess(const cv::Mat &img,
     cv::cvtColor(img, sample, cv::COLOR_GRAY2BGR);
   else
     sample = img;
+    
 
   cv::Mat sample_resized;
   if (sample.size() != input_geometry_)
@@ -210,28 +212,7 @@ vector<float> CaffeMobile::Forward(const string &filename) {
   cv::Mat img = cv::imread(filename, -1);
   CHECK(!img.empty()) << "Unable to decode image " << filename;
 
-  Blob<float> *input_layer = net_->input_blobs()[0];
-  input_layer->Reshape(1, num_channels_, input_geometry_.height,
-                       input_geometry_.width);
-  /* Forward dimension change to all layers. */
-  net_->Reshape();
-
-  vector<cv::Mat> input_channels;
-  WrapInputLayer(&input_channels);
-
-  Preprocess(img, &input_channels);
-
-  clock_t t_start = clock();
-  net_->ForwardPrefilled();
-  clock_t t_end = clock();
-  VLOG(1) << "Forwarding time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC
-          << " ms.";
-
-  /* Copy the output layer to a std::vector */
-  Blob<float> *output_layer = net_->output_blobs()[0];
-  const float *begin = output_layer->cpu_data();
-  const float *end = begin + output_layer->channels();
-  return vector<float>(begin, end);
+  return Forward(img);
 }
 
 vector<float> CaffeMobile::Forward(cv::Mat img) {
@@ -258,12 +239,30 @@ vector<float> CaffeMobile::Forward(cv::Mat img) {
     return vector<float>(begin, end);
 }
 
-vector<int> CaffeMobile::PredictTopK(const string &img_path, int k) {
-  const vector<float> probs = Forward(img_path);
-  k = std::min<int>(std::max(k, 1), probs.size());
-  return argmax(probs, k);
+vector<caffe_result> create_results(vector<int>indices, vector<float>probs, int k){
+    vector<caffe_result> results(k);
+    for (int i=0; i<k; i++)
+    {
+        results[i].synset = indices[i];
+        results[i].prob = probs[indices[i]];
+    }
+    return results;
+}
+    
+vector<caffe_result> CaffeMobile::PredictTopK(const string &img_path, int k) {
+    const vector<float> probs = Forward(img_path);
+    k = std::min<int>(std::max(k, 1), probs.size());
+    vector<int> topK = argmax(probs, k);
+    return create_results(topK,probs,k);
 }
 
+vector<caffe_result> CaffeMobile::predict_top_k(cv::Mat& cv_img, int k) {
+    const vector<float> probs = Forward(cv_img);
+    k = std::min<int>(std::max(k, 1), probs.size());
+    vector<int> topK = argmax(probs,k);
+    return create_results(topK,probs,k);
+}
+    
 vector<vector<float>>
 CaffeMobile::ExtractFeatures(const string &img_path,
                              const string &str_blob_names) {
@@ -288,34 +287,6 @@ CaffeMobile::ExtractFeatures(const string &img_path,
   return features;
 }
 
-vector<caffe_result> create_results(vector<int>indices, vector<float>probs, int k){
-    vector<caffe_result> results(k);
-    for (int i=0; i<k; i++)
-    {
-        results[i].synset = indices[i];
-        results[i].prob = probs[indices[i]];
-    }
-    return results;
-}
-
-
-//Image in should be RGB (3 channels)
-vector<caffe_result> CaffeMobile::predict_top_k(cv::Mat& cv_img, int k) {
-    CHECK(net_ != NULL);
-    
-    Datum datum;
-    cv::Mat cv_img256;
-    
-    //Resize image to 256x256 which is expected by current net
-    cv::resize(cv_img,cv_img256,cv::Size(256,256));
-    const vector<float> probs = Forward(cv_img256);
-
-    CHECK_LE(k, probs.size());
-    vector<size_t> sorted_index = ordered(probs);
-    
-    const vector<int> indices = vector<int>(sorted_index.begin(), sorted_index.begin() + k);
-    return create_results(indices,probs,k);
-}
 
 } // namespace caffe
 

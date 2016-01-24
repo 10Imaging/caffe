@@ -31,10 +31,8 @@ public:
 
   void SetScale(const float scale);
 
-  vector<int> PredictTopK(const string &img_path, int k);
-  //Image in should be RGB (3 channels)
-  vector<caffe_result> predict_top_k(cv::Mat& cv_img, int k=3);  
-  vector<caffe_result> predict_top_k(string img_path, int k=3);
+  vector<caffe_result> PredictTopK(const string &img_path, int k);
+  vector<caffe_result> predict_top_k(cv::Mat& cv_img, int k=3);
 
   vector<vector<float>> ExtractFeatures(const string &img_path,
                                         const string &str_blob_names);

@@ -163,13 +163,13 @@ Java_com_tenimaging_android_caffe_CaffeMobile_predictImage(JNIEnv* env, jobject 
     // release the memory so java can have it again
     (env)->ReleaseIntArrayElements(synsetList, c_synsetList,0);
     (env)->ReleaseFloatArrayElements(probList, c_probList,0);
+    return top_k[0].synset;
   }
-  catch (MyCxxException e)
+  catch (std::exception e)
   {
       throwJavaException (env, e.what());
   }
-
-    return top_k[0].synset;
+  return -1;
 }
 
 JNIEXPORT jobjectArray JNICALL

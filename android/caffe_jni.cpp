@@ -43,6 +43,20 @@ string jstring2string(JNIEnv *env, jstring jstr) {
   return str;
 }
 
+static void throwJavaException(JNIEnv *env, const char *msg)
+{
+    // You can put your own exception here
+    jclass c = env->FindClass("java/lang/RuntimeException");
+
+    if (NULL == c)
+    {
+        //B plan: null pointer ...
+        c = env->FindClass("java/lang/NullPointerException");
+    }
+
+    env->ThrowNew(c, msg);
+}
+
 JNIEXPORT void JNICALL
 Java_com_tenimaging_android_caffe_CaffeMobile_setNumThreads(
     JNIEnv *env, jobject thiz, jint numThreads) {
@@ -107,6 +121,7 @@ Java_com_tenimaging_android_caffe_CaffeMobile_predictImagePath(JNIEnv* env, jobj
 jint JNIEXPORT JNICALL
 Java_com_tenimaging_android_caffe_CaffeMobile_predictImage(JNIEnv* env, jobject thiz, jlong cvmat_img, jint numResults, jintArray synsetList, jfloatArray probList)
 {
+  try {
     CaffeMobile *caffe_mobile = CaffeMobile::Get();
     cv::Mat& cv_img = *(cv::Mat*)(cvmat_img);
     caffe::vector<caffe::caffe_result> top_k = caffe_mobile->predict_top_k(cv_img, numResults);
@@ -131,6 +146,11 @@ Java_com_tenimaging_android_caffe_CaffeMobile_predictImage(JNIEnv* env, jobject 
     // release the memory so java can have it again
     (env)->ReleaseIntArrayElements(synsetList, c_synsetList,0);
     (env)->ReleaseFloatArrayElements(probList, c_probList,0);
+  }
+  catch (MyCxxException e)
+  {
+      throwJavaException (env, e.what());
+  }
 
     return top_k[0].synset;
 }

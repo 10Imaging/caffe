@@ -23,13 +23,14 @@ void ExpLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   const Dtype input_scale = this->layer_param_.exp_param().scale();
   const Dtype input_shift = this->layer_param_.exp_param().shift();
   inner_scale_ = log_base * input_scale;
-  outer_scale_ = (input_shift == Dtype(0)) ? Dtype(1) : pow(base, input_shift);
+  outer_scale_ = (input_shift == Dtype(0)) ? Dtype(1) :
+     ( (base != Dtype(-1)) ? pow(base, input_shift) : exp(input_shift) );
 }
 
 template <typename Dtype>
 void ExpLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
-  const int count = bottom[0]->count();
+  const int_tp count = bottom[0]->count();
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = top[0]->mutable_cpu_data();
   if (inner_scale_ == Dtype(1)) {
@@ -47,7 +48,7 @@ template <typename Dtype>
 void ExpLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
   if (!propagate_down[0]) { return; }
-  const int count = bottom[0]->count();
+  const int_tp count = bottom[0]->count();
   const Dtype* top_data = top[0]->cpu_data();
   const Dtype* top_diff = top[0]->cpu_diff();
   Dtype* bottom_diff = bottom[0]->mutable_cpu_diff();

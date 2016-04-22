@@ -76,8 +76,10 @@ def assign_proto(proto, name, val):
         for k, v in six.iteritems(val):
             assign_proto(getattr(proto, name), k, v)
     else:
-        setattr(proto, name, val)
-
+        try:
+            setattr(proto, name, val)
+        except (AttributeError):
+            getattr(proto, name).append(val)
 
 class Top(object):
     """A Top specifies a single output blob (which could be one of several
@@ -86,6 +88,7 @@ class Top(object):
     def __init__(self, fn, n):
         self.fn = fn
         self.n = n
+        self.name = None
 
     def to_proto(self):
         """Generate a NetParameter that contains all layers needed to compute
@@ -102,6 +105,7 @@ class Function(object):
     are Tops from other layers)."""
 
     def __init__(self, type_name, inputs, params):
+        self.name = None
         self.type_name = type_name
         self.inputs = inputs
         self.params = params
@@ -124,8 +128,11 @@ class Function(object):
 
     def _get_top_name(self, top, names, autonames):
         if top not in names:
-            autonames[top.fn.type_name] += 1
-            names[top] = top.fn.type_name + str(autonames[top.fn.type_name])
+            if top.name != None:
+                names[top] = top.name
+            else:
+                autonames[top.fn.type_name] += 1
+                names[top] = top.fn.type_name + str(autonames[top.fn.type_name])
         return names[top]
 
     def _to_proto(self, layers, names, autonames):
@@ -175,8 +182,14 @@ class NetSpec(object):
     def __getattr__(self, name):
         return self.tops[name]
 
+    def __setitem__(self, key, value):
+        self.__setattr__(key, value)
+
+    def __getitem__(self, item):
+        return self.__getattr__(item)
+
     def to_proto(self):
-        names = {v: k for k, v in six.iteritems(self.tops)}
+        names = {v: (v.name if v.name != None else k) for k, v in six.iteritems(self.tops)}
         autonames = Counter()
         layers = OrderedDict()
         for name, top in six.iteritems(self.tops):

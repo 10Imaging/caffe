@@ -65,14 +65,83 @@ endif()
 # ---[ CUDA
 include(cmake/Cuda.cmake)
 if(NOT HAVE_CUDA)
-  if(CPU_ONLY)
+  if(CPU_ONLY OR NOT USE_CUDA)
     message(STATUS "-- CUDA is disabled. Building without it...")
   else()
+    set(USE_CUDA OFF)
     message(WARNING "-- CUDA is not detected by cmake. Building without it...")
   endif()
+endif()
 
-  # TODO: remove this not cross platform define in future. Use caffe_config.h instead.
-  add_definitions(-DCPU_ONLY)
+# ---[ ViennaCL
+if (USE_GREENTEA)
+  find_package(ViennaCL)
+  if (NOT ViennaCL_FOUND)
+    message(FATAL_ERROR "ViennaCL required for GREENTEA but not found.")
+  endif()
+  include_directories(SYSTEM ${ViennaCL_INCLUDE_DIRS})
+  list(APPEND Caffe_LINKER_LIBS ${ViennaCL_LIBRARIES})
+  set(HAVE_VIENNACL TRUE)
+  set(VIENNACL_WITH_OPENCL ${ViennaCL_WITH_OPENCL})
+  if(USE_FFT)
+    find_package(clFFT)
+    if (NOT CLFFT_FOUND)
+      message(WARNING "clFFT is not detected by cmake.Builiding without USE_FFT.")
+    else()
+      include_directories(SYSTEM ${CLFFT_INCLUDE_DIR})
+      list(APPEND Caffe_LINKER_LIBS ${CLFFT_LIBRARY})
+      set(HAVE_CLFFT TRUE)
+    endif()
+
+    find_package(fftw3)
+    if (NOT FFTW3_FOUND)
+      message(WARNING "fftw3 is not detected by cmake.Builiding without USE_FFT.")
+    else()
+      include_directories(SYSTEM ${FFTW3_INCLUDE_DIR})
+      list(APPEND Caffe_LINKER_LIBS ${FFTW3_LIBRARY})
+    endif()
+
+    find_package(fftw3f)
+    if (NOT FFTW3F_FOUND)
+      message(WARNING "fftw3f is not detected by cmake.Builiding without USE_FFT.")
+    else()
+      include_directories(SYSTEM ${FFTW3F_INCLUDE_DIR})
+      list(APPEND Caffe_LINKER_LIBS ${FFTW3F_LIBRARY})
+    endif()
+
+    if(CLFFT_FOUND AND FFTW3_FOUND AND FFTW3F_FOUND)
+      add_definitions(-DUSE_FFT)
+    endif()
+  endif()
+endif()
+
+if (NOT USE_GREENTEA AND NOT USE_CUDA)
+  if (NOT CPU_ONLY)
+    set(CPU_ONLY ON)
+    message(STATUS "-- NO GPU enabled by cmake. Buildign with CPU_ONLY...")
+  endif()
+endif()
+
+# ---[ clBLAS
+if (USE_CLBLAS AND NOT USE_ISAAC)
+  find_package(clBLAS)
+  if (NOT CLBLAS_FOUND)
+    message(FATAL_ERROR "clBLAS required but not found.")
+  endif()
+  include_directories(SYSTEM ${CLBLAS_INCLUDE_DIR})
+  list(APPEND Caffe_LINKER_LIBS ${CLBLAS_LIBRARY})
+  set(HAVE_CLBLAS TRUE)
+endif()
+
+# ---[ ISAAC
+if (USE_ISAAC)
+  find_package(ISAAC)
+  if (NOT ISAAC_FOUND)
+    message(FATAL_ERROR "ISAAC required but not found.")
+  endif()
+  # include_directories(SYSTEM ${CLBLAS_INCLUDE_DIR})
+  list(APPEND Caffe_LINKER_LIBS ${ISAAC_LIBRARY})
+  set(HAVE_ISAAC TRUE)
 endif()
 
 # ---[ OpenCV
@@ -86,6 +155,11 @@ if(USE_OPENCV)
   message(STATUS "OpenCV found (${OpenCV_CONFIG_PATH})")
   add_definitions(-DUSE_OPENCV)
 endif()
+
+# ---[ OpenMP
+find_package(OpenMP QUIET)
+# If OpenMP is not found then OpenMP_CXX_FLAGS will be empty
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 # ---[ BLAS
 if(NOT APPLE)
@@ -125,15 +199,14 @@ if(BUILD_python)
     find_package(NumPy 1.7.1)
     # Find the matching boost python implementation
     set(version ${PYTHONLIBS_VERSION_STRING})
-
-    STRING( REPLACE "." "" boost_py_version ${version} )
+    STRING( REGEX REPLACE "[^0-9]" "" boost_py_version ${version} )
     find_package(Boost 1.46 COMPONENTS "python-py${boost_py_version}")
     set(Boost_PYTHON_FOUND ${Boost_PYTHON-PY${boost_py_version}_FOUND})
 
     while(NOT "${version}" STREQUAL "" AND NOT Boost_PYTHON_FOUND)
       STRING( REGEX REPLACE "([0-9.]+).[0-9]+" "\\1" version ${version} )
-
-      STRING( REPLACE "." "" boost_py_version ${version} )
+      
+      STRING( REGEX REPLACE "[^0-9]" "" boost_py_version ${version} )
       find_package(Boost 1.46 COMPONENTS "python-py${boost_py_version}")
       set(Boost_PYTHON_FOUND ${Boost_PYTHON-PY${boost_py_version}_FOUND})
 

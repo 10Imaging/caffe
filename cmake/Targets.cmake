@@ -1,16 +1,17 @@
 ################################################################################################
 # Defines global Caffe_LINK flag, This flag is required to prevent linker from excluding
 # some objects which are not addressed directly but are registered via static constructors
-if(BUILD_SHARED_LIBS)
-  set(Caffe_LINK caffe)
-else()
-  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(Caffe_LINK -Wl,-force_load caffe)
-  elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(Caffe_LINK -Wl,--whole-archive caffe -Wl,--no-whole-archive)
+macro(caffe_set_caffe_link)
+  if(BUILD_SHARED_LIBS)
+    set(Caffe_LINK caffe)
+  else()
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+      set(Caffe_LINK -Wl,-force_load caffe)
+    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+      set(Caffe_LINK -Wl,--whole-archive caffe -Wl,--no-whole-archive)
+    endif()
   endif()
-endif()
-
+endmacro()
 ################################################################################################
 # Convenient command to setup source group for IDEs that support this feature (VS, XCode)
 # Usage:
@@ -54,12 +55,14 @@ function(caffe_pickup_caffe_sources root)
   caffe_source_group("Include"        GLOB "${root}/include/caffe/*.h*")
   caffe_source_group("Include\\Util"  GLOB "${root}/include/caffe/util/*.h*")
   caffe_source_group("Include"        GLOB "${PROJECT_BINARY_DIR}/caffe_config.h*")
+  caffe_source_group("Include"        GLOB "${root}/include/caffe/greentea/*.hpp")
   caffe_source_group("Source"         GLOB "${root}/src/caffe/*.cpp")
   caffe_source_group("Source\\Util"   GLOB "${root}/src/caffe/util/*.cpp")
   caffe_source_group("Source\\Layers" GLOB "${root}/src/caffe/layers/*.cpp")
   caffe_source_group("Source\\Cuda"   GLOB "${root}/src/caffe/layers/*.cu")
   caffe_source_group("Source\\Cuda"   GLOB "${root}/src/caffe/util/*.cu")
   caffe_source_group("Source\\Proto"  GLOB "${root}/src/caffe/proto/*.proto")
+  caffe_source_group("Source"         GLOB "${root}/src/caffe/greentea*.cpp")
 
   # source groups for test target
   caffe_source_group("Include"      GLOB "${root}/include/caffe/test/test_*.h*")
@@ -90,6 +93,16 @@ function(caffe_pickup_caffe_sources root)
   # add proto to make them editable in IDEs too
   file(GLOB_RECURSE proto_files ${root}/src/caffe/*.proto)
   list(APPEND srcs ${proto_files})
+
+  # OpenCL but not CUDA backend tweak
+  if(USE_GREENTEA AND NOT USE_CUDA)
+    SET_SOURCE_FILES_PROPERTIES(${cuda} PROPERTIES LANGUAGE CXX)
+    SET_SOURCE_FILES_PROPERTIES(${cuda} PROPERTIES COMPILE_FLAGS "-x c++")
+    SET_SOURCE_FILES_PROPERTIES(${test_cuda} PROPERTIES LANGUAGE CXX)
+    SET_SOURCE_FILES_PROPERTIES(${test_cuda} PROPERTIES COMPILE_FLAGS "-x c++")
+    list(APPEND srcs ${cuda})
+    list(APPEND test_srcs ${test_cuda})
+  endif()
 
   # convet to absolute paths
   caffe_convert_absolute_paths(srcs)

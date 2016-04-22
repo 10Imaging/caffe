@@ -109,7 +109,7 @@ Java_com_tenimaging_android_caffe_CaffeMobile_predictImagePath(JNIEnv* env, jobj
 {
     CaffeMobile *caffe_mobile = CaffeMobile::Get();
     caffe::vector<caffe::caffe_result> top_k = caffe_mobile->PredictTopK(jstring2string(env, imgPath), numResults);
-    LOGD("top result: %d %f", top_k[0].synset,top_k[0].prob);
+    //LOGD("top result: %d %f", top_k[0].synset,top_k[0].prob);
     
     jint *c_synsetList;
     c_synsetList = (env)->GetIntArrayElements(synsetList,NULL);
@@ -142,7 +142,7 @@ Java_com_tenimaging_android_caffe_CaffeMobile_predictImage(JNIEnv* env, jobject 
     CaffeMobile *caffe_mobile = CaffeMobile::Get();
     cv::Mat& cv_img = *(cv::Mat*)(cvmat_img);
     caffe::vector<caffe::caffe_result> top_k = caffe_mobile->predict_top_k(cv_img, numResults);
-    LOGD("top result: %d %f", top_k[0].synset,top_k[0].prob);
+    //LOGD("top result: %d %f", top_k[0].synset,top_k[0].prob);
 
     jint *c_synsetList;
     c_synsetList = (env)->GetIntArrayElements(synsetList,NULL);

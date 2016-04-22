@@ -230,7 +230,7 @@ vector<float> CaffeMobile::Forward(cv::Mat img) {
     clock_t t_start = clock();
     net_->ForwardPrefilled();
     clock_t t_end = clock();
-    VLOG(1) << "Forwarding time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC<< " ms.";
+    //VLOG(1) << "Forwarding time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC<< " ms.";
         
     /* Copy the output layer to a std::vector */
     Blob<float> *output_layer = net_->output_blobs()[0];

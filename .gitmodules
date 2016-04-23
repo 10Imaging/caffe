@@ -1,0 +1,3 @@
+[submodule "viennacl"]
+	path = viennacl
+	url = https://github.com/10imaging/viennacl.git

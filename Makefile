@@ -50,15 +50,6 @@ DYNAMIC_VERSIONED_NAME_SHORT := $(DYNAMIC_NAME_SHORT).$(DYNAMIC_VERSION_MAJOR).$
 DYNAMIC_NAME := $(LIB_BUILD_DIR)/$(DYNAMIC_VERSIONED_NAME_SHORT)
 COMMON_FLAGS += -DCAFFE_VERSION=$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR).$(DYNAMIC_VERSION_REVISION)
 
-# toggle glog or miniglog
-USE_GLOG ?= 1
-ifeq ($(USE_GLOG), 1)
-	LIBRARIES += glog
-else
-	CXX_SRCS := ./src/ceres/internal/miniglog/glog/logging.cpp
-	INCLUDE_DIRS := ./include/ceres/internal/miniglog/ $(INCLUDE_DIRS)
-endif
-
 ##############################
 # Get all source files
 ##############################
@@ -186,14 +177,16 @@ CUDA_LIB_DIR :=
 # add <cuda>/lib64 only if it exists
 ifneq ("$(wildcard $(CUDA_DIR)/lib64)","")
 	CUDA_LIB_DIR += $(CUDA_DIR)/lib64
+	CUDA_LIB_DIR += $(CUDA_DIR)/lib64/stubs
 endif
 CUDA_LIB_DIR += $(CUDA_DIR)/lib
+CUDA_LIB_DIR += $(CUDA_DIR)/lib/stubs
 
 INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
 ifeq ($(USE_CUDA), 1)
 	INCLUDE_DIRS += $(CUDA_INCLUDE_DIR)
-	LIBRARY_DIRS += $(CUDA_LIB_DIR)
-	LIBRARIES += cudart cublas curand
+	LIBRARY_DIRS += $(CUDA_LIB_DIR) $(CUDA_LIB_DIR)/stubs
+	LIBRARIES := cudart cublas curand nvrtc cuda
 endif
 
 LIBRARIES += gflags protobuf boost_system boost_filesystem m
@@ -293,8 +286,8 @@ endif
 # Current Xcode does not officially support openmp
 ifeq ($(OSX), 1)
 	CXX := /usr/bin/clang++
-	ifeq ($(USE_CUDA), 1)
-		CUDA_VERSION := $(shell $(CUDA_DIR)/bin/nvcc -V | grep -o 'release \d' | grep -o '\d')
+	ifneq ($(USE_CUDA), 1)
+		CUDA_VERSION := $(shell $(CUDA_DIR)/bin/nvcc -V | grep -o 'release [0-9.]*' | tr -d '[a-z ]')
 		ifeq ($(shell echo | awk '{exit $(CUDA_VERSION) < 7.0;}'), 1)
 			CXXFLAGS += -stdlib=libstdc++
 			LINKFLAGS += -stdlib=libstdc++
@@ -368,22 +361,32 @@ ifeq ($(USE_GREENTEA),1)
 	
 	# Use AMD clBLAS
 	ifeq ($(USE_CLBLAS), 1)
+		LIBRARY_DIRS += $(CLBLAS_LIB)
+		INCLUDE_DIRS += $(CLBLAS_INCLUDE)
 		LIBRARIES += clBLAS
 		COMMON_FLAGS += -DUSE_CLBLAS
 	endif
-
-        ifeq ($(USE_FFT), 1)
-                CLFFT_INCLUDE_DIR := /usr/include
-		CLFFT_LIB_DIR := /usr/lib64/clfft
-  	        INCLUDE_DIRS += $(CLFFT_INCLUDE_DIR)
-		LIBRARY_DIRS += $(CLFFT_LIB_DIR)
-		LIBRARIES += clFFT
-        endif
 	
-	# Use ISAAC clBLAS replacement
+	# Use CLBlast as clBLAS replacement
+	ifeq ($(USE_CLBLAST), 1)
+		LIBRARY_DIRS += $(CLBLAST_LIB)
+		INCLUDE_DIRS += $(CLBLAST_INCLUDE)
+		LIBRARIES += clblast
+		COMMON_FLAGS += -DUSE_CLBLAST
+	endif
+
+	# Use ISAAC as clBLAS replacement
 	ifeq ($(USE_ISAAC), 1)
 		LIBRARIES += isaac
 		COMMON_FLAGS += -DUSE_CLBLAS
+	endif
+
+	ifeq ($(USE_FFT), 1)
+		CLFFT_INCLUDE_DIR := /usr/include
+		CLFFT_LIB_DIR := /usr/lib64/clfft
+		INCLUDE_DIRS += $(CLFFT_INCLUDE_DIR)
+		LIBRARY_DIRS += $(CLFFT_LIB_DIR)
+		LIBRARIES += clFFT
 	endif
 	
 	# Requires valid OpenCL library

@@ -10,8 +10,8 @@ endif()
 project(Caffe C CXX)
 
 # ---[ Caffe version
-set(CAFFE_TARGET_VERSION "1.0.0-rc3")
-set(CAFFE_TARGET_SOVERSION "1.0.0-rc3")
+set(CAFFE_TARGET_VERSION "1.0.0-rc3" CACHE STRING "Caffe logical version")
+set(CAFFE_TARGET_SOVERSION "1.0.0-rc3" CACHE STRING "Caffe soname version")
 add_definitions(-DCAFFE_VERSION=${CAFFE_TARGET_VERSION})
 
 # ---[ Using cmake scripts and modules
@@ -30,6 +30,7 @@ caffe_option(CPU_ONLY "Build Caffe without CUDA and OpenCL support" OFF)
 caffe_option(USE_INDEX_64 "Build Caffe with 64 bit indexing" OFF)
 caffe_option(USE_CUDA "Build Caffe with CUDA support" ON)
 caffe_option(USE_GREENTEA "Build Caffe with OpenCL support" ON)
+caffe_option(USE_LIBDNN "Build Caffe with OpenCL libdnn" OFF)
 caffe_option(USE_CLBLAS "Build Caffe with clBLAS support (instead of using ViennaClBLAS)" OFF)
 caffe_option(USE_ISAAC "Build Caffe with ISAAC support (instead of using ViennaClBLAS)" OFF)
 caffe_option(USE_CUDNN "Build Caffe with cuDNN libary support" OFF)
@@ -44,7 +45,6 @@ caffe_option(USE_GLOG "Build with glog support" ON)
 caffe_option(USE_LEVELDB "Build with levelDB" ON)
 caffe_option(USE_LMDB "Build with lmdb" ON)
 caffe_option(ALLOW_LMDB_NOLOCK "Allow MDB_NOLOCK when reading LMDB files (only if necessary)" OFF)
-caffe_option(USE_HDF5 "Build with hdf5" ON)
 caffe_option(USE_FFT "build with fftw3 or/and clFFT" OFF)
 
 # ---[ Flag consistency check

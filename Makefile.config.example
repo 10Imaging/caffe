@@ -7,19 +7,33 @@
 # GreenTea (ViennaCL/OpenCL) backend switch
 
 # Enable the CUDA backend
-USE_CUDA := 1
+# USE_CUDA := 1
 
 # Enable the OpenCL/Greentea backend
-USE_GREENTEA := 0
+USE_GREENTEA := 1
+# Enable the Greentea-LibDNN convolution backend
+# USE_LIBDNN := 1
 
 # Folder of the ViennaCL header-only library
 VIENNACL_DIR = ../ViennaCL
 
+# Override BLAS, use CLBlast instead of ViennacLBLAS.
+# USE_CLBLAST := 1
+# Custom CLBlast lib and include directories.
+# CLBLAST_INCLUDE := /path/to/clblast/include
+# CLBLAST_LIB     := /path/to/clblast/lib
+
 # Override BLAS, use clBLAS insead of ViennaclBLAS.
 # USE_CLBLAS := 1
+# Custom clBLAS lib and include directories.
+# CLBLAS_INCLUDE := /path/to/clblas/include
+# CLBLAS_LIB     := /path/to/clblas/lib
 
 # Override BLAS, use ISAAC instead of ViennaclBLAS.
 # USE_ISAAC := 1
+
+# Uncomment for FFT
+# USE_FFT := 1
 
 # cuDNN acceleration switch (uncomment to build with cuDNN).
 # USE_CUDNN := 1
@@ -126,6 +140,7 @@ LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib
 # (Usually not necessary -- OpenCV libraries are normally installed in one of the above $LIBRARY_DIRS.)
 # USE_PKG_CONFIG := 1
 
+# N.B. both build and distribute dirs are cleared on `make clean`
 BUILD_DIR := build
 DISTRIBUTE_DIR := distribute
 

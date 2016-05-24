@@ -55,10 +55,6 @@ function(caffe_generate_export_configs)
     set(HAVE_CUDA FALSE)
   endif()
 
-  if(USE_GLOG)
-    list(APPEND Caffe_DEFINITIONS -DUSE_GLOG)
-  endif()
-
   if(USE_OPENCV)
     list(APPEND Caffe_DEFINITIONS -DUSE_OPENCV)
   endif()

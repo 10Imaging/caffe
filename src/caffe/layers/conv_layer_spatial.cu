@@ -943,7 +943,6 @@ void ConvolutionLayerSpatial<float>::create_convolution_kernel(
 template<>
 void ConvolutionLayerSpatial<float>::setup_convolution(
     const vector<Blob<float>*>& bottom, const vector<Blob<float>*>& top) {
-
   // Generates static key_
   generate_key();
   // Initializes unique kernel ID
@@ -985,7 +984,6 @@ void ConvolutionLayerSpatial<float>::setup_convolution(
                                                    num_, kernelQueue[x]);
 
   int_tp failures = 0;
-
   bool verification = false;
   if (kernelQueue.size()) {
     while (failures < kernelQueue.size()) {
@@ -1124,7 +1122,6 @@ template<>
 void ConvolutionLayerSpatial<float>::Backward_gpu(
     const vector<Blob<float>*>& top, const vector<bool>& propagate_down,
     const vector<Blob<float>*>& bottom) {
-
   const float* weight = this->blobs_[0]->gpu_data();
   float* weight_diff = this->blobs_[0]->mutable_gpu_diff();
   for (int_tp i = 0; i < top.size(); ++i) {

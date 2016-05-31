@@ -36,18 +36,20 @@ void device::Init() {
   if (backend_ == BACKEND_CUDA) {
 #ifdef USE_CUDA
     workgroup_sizes_[0] = CAFFE_CUDA_NUM_THREADS;
+    workgroup_sizes_[1] = CAFFE_CUDA_NUM_THREADS;
+    workgroup_sizes_[2] = CAFFE_CUDA_NUM_THREADS;
 #endif  // USE_CUDA
   } else {
 #ifdef USE_GREENTEA
     viennacl::ocl::context &ctx = viennacl::ocl::get_context(id_);
 
-    std::vector<uint_tp> temp(3);
+    std::vector<size_t> temp(3);
     clGetDeviceInfo(ctx.devices()[0].id(),
                     CL_DEVICE_MAX_WORK_ITEM_SIZES,
-                    sizeof(uint_tp), &temp[0], NULL);
-    workgroup_sizes_[0] = std::min(temp[0], (uint_tp)1024);
-    workgroup_sizes_[1] = std::min(temp[1], (uint_tp)1024);
-    workgroup_sizes_[2] = std::min(temp[2], (uint_tp)1024);
+                    3 * sizeof(size_t), &temp[0], NULL);
+    workgroup_sizes_[0] = temp[0];
+    workgroup_sizes_[1] = temp[1];
+    workgroup_sizes_[2] = temp[2];
     cl_bool host_unified;
     clGetDeviceInfo(ctx.devices()[0].id(),
                     CL_DEVICE_HOST_UNIFIED_MEMORY,

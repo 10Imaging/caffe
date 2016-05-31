@@ -59,6 +59,7 @@ void CaffeFreeHost(void* ptr, device* device_context) {
   free(ptr);
 }
 
+
 SyncedMemory::~SyncedMemory() {
 #ifndef CPU_ONLY
   if (gpu_ptr_ && own_gpu_data_) {

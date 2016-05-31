@@ -451,7 +451,6 @@ void greentea_gpu_gemv(const int_tp ctx_id, const CBLAS_TRANSPOSE TransA,
                                                       size_type(N)
                                                       VCL_ROW_MAJOR);
     v2 *= beta;
-
     if (TransA == CblasTrans) {
       v2 += alpha * viennacl::linalg::prod(viennacl::trans(mat), v1);
     } else {
@@ -550,7 +549,6 @@ void greentea_gpu_axpy(const int_tp ctx_id, const int_tp N, const Dtype alpha,
     viennacl::vector_base<Dtype, size_t, ptrdiff_t> v2(Y, size_type(N),
                                                      size_type(offY),
                                                      difference_type(1), ctx);
-
     v2 += alpha * v1;
 
 #endif  // clBLAS, CLBlast, or default (ViennaCL)
@@ -673,7 +671,6 @@ void greentea_gpu_scal(const int_tp ctx_id, const int_tp N, const Dtype alpha,
     viennacl::vector_base<Dtype, size_t, ptrdiff_t> v1(x, size_type(N),
                                                      size_type(offx),
                                                      difference_type(1), ctx);
-
     v1 *= alpha;
 
 #endif  // clBLAS, CLBlast, or default (ViennaCL)

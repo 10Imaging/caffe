@@ -78,6 +78,13 @@ JNIEXPORT jint JNICALL Java_com_tenimaging_android_iris_CaffeMobile_loadModel(
   return 0;
 }
 
+
+JNIEXPORT void JNICALL Java_com_tenimaging_android_iris_CaffeMobile_unloadModel(
+        JNIEnv *env, jobject thiz) {
+    CaffeMobile *caffe_mobile = CaffeMobile::Get();
+    caffe_mobile->UnLoad();
+}
+
 JNIEXPORT void JNICALL
 Java_com_tenimaging_android_iris_CaffeMobile_setMeanWithMeanFile(
     JNIEnv *env, jobject thiz, jstring meanFile) {

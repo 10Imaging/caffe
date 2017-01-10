@@ -95,6 +95,11 @@ CaffeMobile::CaffeMobile(const string &model_path, const string &weights_path) {
   scale_ = 0.0;
 }
 
+void CaffeMobile::UnLoad() {
+    delete caffe_mobile_;
+    caffe_mobile_ = nullptr;
+}
+
 CaffeMobile::~CaffeMobile() { net_.reset(); }
 
 void CaffeMobile::SetMean(const vector<float> &mean_values) {
@@ -221,12 +226,10 @@ vector<float> CaffeMobile::Forward(cv::Mat img) {
                              input_geometry_.width);
     /* Forward dimension change to all layers. */
     net_->Reshape();
-        
     vector<cv::Mat> input_channels;
     WrapInputLayer(&input_channels);
         
     Preprocess(img, &input_channels);
-        
     clock_t t_start = clock();
     net_->ForwardPrefilled();
     clock_t t_end = clock();

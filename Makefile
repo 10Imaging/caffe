@@ -14,7 +14,7 @@ endif
 
 CXXFLAGS += -std=c++11 -Wno-deprecated-declarations
 LINKFLAGS += -std=c++11 -Wno-deprecated-declarations
-NVCCFLAGS += -Xcompiler "-Wno-deprecated-declarations" -Xlinker "-Wno-deprecated-declarations" -Xarchive "-Wno-deprecated-declarations" -Xnvlink "-Wno-deprecated-declarations"
+NVCCFLAGS +=  -std=c++11 -Xcompiler "-Wno-deprecated-declarations -D__CORRECT_ISO_CPP11_MATH_H_PROTO" -Xlinker "-Wno-deprecated-declarations" -Xarchive "-Wno-deprecated-declarations" -Xnvlink "-Wno-deprecated-declarations"
 
 BUILD_DIR_LINK := $(BUILD_DIR)
 ifeq ($(RELEASE_BUILD_DIR),)
@@ -286,7 +286,7 @@ endif
 # Current Xcode does not officially support openmp
 ifeq ($(OSX), 1)
 	CXX := /usr/bin/clang++
-	ifneq ($(USE_CUDA), 1)
+	ifeq ($(USE_CUDA), 1)
 		CUDA_VERSION := $(shell $(CUDA_DIR)/bin/nvcc -V | grep -o 'release [0-9.]*' | tr -d '[a-z ]')
 		ifeq ($(shell echo | awk '{exit $(CUDA_VERSION) < 7.0;}'), 1)
 			CXXFLAGS += -stdlib=libstdc++
@@ -313,14 +313,20 @@ ifeq ($(OSX), 1)
 	ORIGIN := @loader_path
 	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../build/lib
 else
-	CXXFLAGS += -fopenmp
-	LINKFLAGS += -fopenmp
+	ifeq (${USE_OPENMP}, 1)
+		CXXFLAGS += -fopenmp
+		LINKFLAGS += -fopenmp
+	endif
 	ORIGIN := \$$ORIGIN
 endif
 
 # GreenTea backend related define, include, and lib
 ifeq ($(USE_LIBDNN), 1)
 	COMMON_FLAGS += -DUSE_LIBDNN
+endif
+
+ifeq ($(USE_INTEL_SPATIAL), 1)
+	COMMON_FLAGS += -DUSE_INTEL_SPATIAL
 endif
 
 ifeq ($(USE_CUDA), 1)
@@ -504,8 +510,11 @@ else
 		LIBRARIES += cblas
 		# 10.10 has accelerate while 10.9 has veclib
 		XCODE_CLT_VER := $(shell pkgutil --pkg-info=com.apple.pkg.CLTools_Executables | grep 'version' | sed 's/[^0-9]*\([0-9]\).*/\1/')
+		XCODE_CLT_GEQ_7 := $(shell [ $(XCODE_CLT_VER) -gt 6 ] && echo 1)
 		XCODE_CLT_GEQ_6 := $(shell [ $(XCODE_CLT_VER) -gt 5 ] && echo 1)
-		ifeq ($(XCODE_CLT_GEQ_6), 1)
+		ifeq ($(XCODE_CLT_GEQ_7), 1)
+			BLAS_INCLUDE ?= /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/$(shell ls /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/ | sort | tail -1)/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
+		else ifeq ($(XCODE_CLT_GEQ_6), 1)
 			BLAS_INCLUDE ?= /System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Headers/
 			LDFLAGS += -framework Accelerate
 		else

@@ -41,6 +41,13 @@ DEFINE_string(solver, "",
     "The solver definition protocol buffer text file.");
 DEFINE_string(model, "",
     "The model definition protocol buffer text file.");
+DEFINE_string(phase, "",
+    "Optional; network phase (TRAIN or TEST). Only used for 'time'.");
+DEFINE_int32(level, 0,
+    "Optional; network level.");
+DEFINE_string(stage, "",
+    "Optional; network stages (not to be confused with phase), "
+    "separated by ','.");
 DEFINE_string(snapshot, "",
     "Optional; the snapshot solver state to resume training.");
 DEFINE_string(weights, "",
@@ -108,6 +115,25 @@ static void get_gpus(vector<int>* gpus) {
   }
 }
 
+// Parse phase from flags
+caffe::Phase get_phase_from_flags(caffe::Phase default_value) {
+  if (FLAGS_phase == "")
+    return default_value;
+  if (FLAGS_phase == "TRAIN")
+    return caffe::TRAIN;
+  if (FLAGS_phase == "TEST")
+    return caffe::TEST;
+  LOG(FATAL) << "phase must be \"TRAIN\" or \"TEST\"";
+  return caffe::TRAIN;  // Avoid warning
+}
+
+// Parse stages from flags
+vector<string> get_stages_from_flags() {
+  vector<string> stages;
+  boost::split(stages, FLAGS_stage, boost::is_any_of(","));
+  return stages;
+}
+
 // caffe commands to call by
 //     caffe <command> <args>
 //
@@ -172,6 +198,7 @@ caffe::SolverAction::Enum GetRequestedAction(
     return caffe::SolverAction::NONE;
   }
   LOG(FATAL) << "Invalid signal effect \""<< flag_value << "\" was specified";
+  return caffe::SolverAction::NONE;
 }
 
 // Train / Finetune a model.
@@ -180,9 +207,15 @@ int train() {
   CHECK(!FLAGS_snapshot.size() || !FLAGS_weights.size())
       << "Give a snapshot to resume training or weights to finetune "
       "but not both.";
+  vector<string> stages = get_stages_from_flags();
 
   caffe::SolverParameter solver_param;
   caffe::ReadSolverParamsFromTextFileOrDie(FLAGS_solver, &solver_param);
+
+  solver_param.mutable_train_state()->set_level(FLAGS_level);
+  for (int i = 0; i < stages.size(); i++) {
+    solver_param.mutable_train_state()->add_stage(stages[i]);
+  }
 
   // If the gpus flag is not provided, allow the mode and device to be set
   // in the solver prototxt.
@@ -265,6 +298,7 @@ RegisterBrewFunction(train);
 int test() {
   CHECK_GT(FLAGS_model.size(), 0) << "Need a model definition to score.";
   CHECK_GT(FLAGS_weights.size(), 0) << "Need model weights to score.";
+  vector<string> stages = get_stages_from_flags();
 
   // Set device id and mode
   vector<int> gpus;
@@ -281,7 +315,8 @@ int test() {
     Caffe::set_mode(Caffe::CPU);
   }
   // Instantiate the caffe net.
-  Net<float> caffe_net(FLAGS_model, caffe::TEST, Caffe::GetDefaultDevice());
+  Net<float> caffe_net(FLAGS_model, caffe::TEST,
+                       Caffe::GetDefaultDevice(), FLAGS_level, &stages);
   caffe_net.CopyTrainedLayersFrom(FLAGS_weights);
   LOG(INFO) << "Running for " << FLAGS_iterations << " iterations.";
 
@@ -342,6 +377,8 @@ RegisterBrewFunction(test);
 // Time: benchmark the execution time of a model.
 int time() {
   CHECK_GT(FLAGS_model.size(), 0) << "Need a model definition to time.";
+  caffe::Phase phase = get_phase_from_flags(caffe::TRAIN);
+  vector<string> stages = get_stages_from_flags();
 
   // Set device id and mode
   vector<int> gpus;
@@ -358,7 +395,8 @@ int time() {
     Caffe::set_mode(Caffe::CPU);
   }
   // Instantiate the caffe net.
-  Net<float> caffe_net(FLAGS_model, caffe::TRAIN, Caffe::GetDefaultDevice());
+  Net<float> caffe_net(FLAGS_model, phase,
+                       Caffe::GetDefaultDevice(), FLAGS_level, &stages);
 
   // Do a clean forward and backward pass, so that memory allocation are done
   // and future iterations will be more stable.
@@ -368,8 +406,10 @@ int time() {
   float initial_loss;
   caffe_net.Forward(&initial_loss);
   LOG(INFO) << "Initial loss: " << initial_loss;
-  LOG(INFO) << "Performing Backward";
-  caffe_net.Backward();
+  if (phase == caffe::TRAIN) {
+    LOG(INFO) << "Performing Backward";
+    caffe_net.Backward();
+  }
 
   const vector<shared_ptr<Layer<float> > >& layers = caffe_net.layers();
   const vector<vector<Blob<float>*> >& bottom_vecs = caffe_net.bottom_vecs();
@@ -398,15 +438,17 @@ int time() {
       forward_time_per_layer[i] += timer.MicroSeconds();
     }
     forward_time += forward_timer.MicroSeconds();
-    backward_timer.Start();
-    for (int_tp i = layers.size() - 1; i >= 0; --i) {
-      timer.Start();
-      layers[i]->Backward(top_vecs[i], bottom_need_backward[i],
-                          bottom_vecs[i]);
-      Caffe::Synchronize(Caffe::GetDefaultDevice()->id());
-      backward_time_per_layer[i] += timer.MicroSeconds();
+    if (phase == caffe::TRAIN) {
+      backward_timer.Start();
+      for (int_tp i = layers.size() - 1; i >= 0; --i) {
+        timer.Start();
+        layers[i]->Backward(top_vecs[i], bottom_need_backward[i],
+                            bottom_vecs[i]);
+        Caffe::Synchronize(Caffe::GetDefaultDevice()->id());
+        backward_time_per_layer[i] += timer.MicroSeconds();
+      }
+      backward_time += backward_timer.MicroSeconds();
     }
-    backward_time += backward_timer.MicroSeconds();
     LOG(INFO) << "Iteration: " << j + 1 << " forward-backward time: "
       << iter_timer.MilliSeconds() << " ms.";
   }
@@ -489,6 +531,7 @@ int autotune() {
     }
 #endif  // USE_LIBDNN
   }
+  return 0;
 }
 RegisterBrewFunction(autotune);
 

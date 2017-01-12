@@ -26,7 +26,7 @@ void ContrastiveLossLayer<Dtype>::Forward_gpu(
                   diff_.mutable_gpu_data());  // a_i-b_i
     caffe_gpu_powx(count, diff_.mutable_gpu_data(),  // a_i-b_i
                    Dtype(2), diff_sq_.mutable_gpu_data());  // (a_i-b_i)^2
-    caffe_gpu_gemv(CblasNoTrans, bottom[0]->num(), bottom[0]->channels(),
+    caffe_gpu_gemv(CblasNoTrans, bottom[0]->shape(0), bottom[0]->shape(1),
                    Dtype(1.0),
                    diff_sq_.gpu_data(),  // (a_i-b_i)^2
                    summer_vec_.gpu_data(), Dtype(0.0),
@@ -44,7 +44,7 @@ void ContrastiveLossLayer<Dtype>::Forward_gpu(
                              Dtype(2), (cl_mem) (diff_sq_.mutable_gpu_data()),
                              0);  // (a_i-b_i)^2
     greentea_gpu_gemv<Dtype>(this->device_->id(), CblasNoTrans,
-                             bottom[0]->num(), bottom[0]->channels(),
+                             bottom[0]->shape(0), bottom[0]->shape(1),
                              Dtype(1.0), (cl_mem) (diff_sq_.gpu_data()),
                              0,  // (a_i-b_i)^2
                              (cl_mem) (summer_vec_.gpu_data()), 0, Dtype(0.0),
@@ -54,7 +54,7 @@ void ContrastiveLossLayer<Dtype>::Forward_gpu(
 
   Dtype margin = this->layer_param_.contrastive_loss_param().margin();
   Dtype loss(0.0);
-  for (int_tp i = 0; i < bottom[0]->num(); ++i) {
+  for (int_tp i = 0; i < bottom[0]->shape(0); ++i) {
     if (static_cast<int_tp>(bottom[2]->cpu_data()[i])) {  // similar pairs
       loss += dist_sq_.cpu_data()[i];
     } else {  // dissimilar pairs
@@ -67,7 +67,7 @@ void ContrastiveLossLayer<Dtype>::Forward_gpu(
       }
     }
   }
-  loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
+  loss = loss / static_cast<Dtype>(bottom[0]->shape(0)) / Dtype(2);
   top[0]->mutable_cpu_data()[0] = loss;
 }
 
@@ -110,23 +110,14 @@ void ContrastiveLossLayer<Dtype>::Backward_gpu(
   const bool legacy_version = this->layer_param_.contrastive_loss_param()
       .legacy_version();
 
-#ifdef USE_GREENTEA
-    viennacl::ocl::context &ctx = viennacl::ocl::get_context(
-        this->device_->id());
-    viennacl::ocl::program &program = this->device_->program();
-    viennacl::ocl::kernel &oclk_cll = program.get_kernel(
-        legacy_version ? CL_KERNEL_SELECT("cll_backward_legacy") :
-            CL_KERNEL_SELECT("cll_backward"));
-#endif
-
   for (int_tp i = 0; i < 2; ++i) {
     if (propagate_down[i]) {
       const int_tp count = bottom[0]->count();
-      const int_tp channels = bottom[0]->channels();
+      const int_tp channels = bottom[0]->shape(1);
       Dtype margin = this->layer_param_.contrastive_loss_param().margin();
       const Dtype sign = (i == 0) ? 1 : -1;
       const Dtype alpha = sign * top[0]->cpu_diff()[0]
-          / static_cast<Dtype>(bottom[0]->num());
+          / static_cast<Dtype>(bottom[0]->shape(0));
 
       if (this->device_->backend() == BACKEND_CUDA) {
 #ifdef USE_CUDA
@@ -142,6 +133,12 @@ void ContrastiveLossLayer<Dtype>::Backward_gpu(
 #endif  // USE_CUDA
       } else {
 #ifdef USE_GREENTEA
+        viennacl::ocl::context &ctx = viennacl::ocl::get_context(
+            this->device_->id());
+        viennacl::ocl::program &program = this->device_->program();
+        viennacl::ocl::kernel &oclk_cll = program.get_kernel(
+            legacy_version ? CL_KERNEL_SELECT("cll_backward_legacy") :
+                CL_KERNEL_SELECT("cll_backward"));
         viennacl::ocl::enqueue(
             oclk_cll(
                 count, channels, margin, alpha,

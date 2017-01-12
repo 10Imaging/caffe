@@ -1,6 +1,8 @@
+#ifdef USE_INTEL_SPATIAL
 #ifndef CAFFE_CONV_SPATIAL_LAYER_HPP_
 #define CAFFE_CONV_SPATIAL_LAYER_HPP_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -95,7 +97,6 @@ class ConvolutionLayerSpatial : public BaseConvolutionLayer<Dtype> {
     bool autoTune;
     bool tested;
     bool swizzle_weights;
-    bool batched_execute;
     bool use_null_local;
     int_tp kernelType;
 
@@ -103,7 +104,7 @@ class ConvolutionLayerSpatial : public BaseConvolutionLayer<Dtype> {
     }
     kernelConfig(string name, size_t* global_size, size_t* local_size,
     int_tp* workItem,
-                 bool tune, bool swizzle, bool batched, bool null_local,
+                 bool tune, bool swizzle, bool null_local,
                  int_tp type = 0) {
       kernelName = name;
       for (int_tp x = 0; x < 3; x++) {
@@ -113,7 +114,6 @@ class ConvolutionLayerSpatial : public BaseConvolutionLayer<Dtype> {
       }
       autoTune = tune;
       swizzle_weights = swizzle;
-      batched_execute = batched;
       use_null_local = null_local;
       verified = false;
       tested = false;
@@ -123,18 +123,9 @@ class ConvolutionLayerSpatial : public BaseConvolutionLayer<Dtype> {
 
 #ifndef CPU_ONLY
 #ifdef USE_GREENTEA
-  virtual bool generate_kernel(const vector<Blob<Dtype>*>& bottom,
-                               const vector<Blob<Dtype>*>& top,
-                               int_tp blockWidth,
-                               int_tp blockHeight,
-                               int_tp blockDepth);
-  virtual bool generate_batched_kernel(const vector<Blob<Dtype>*>& bottom,
-                                       const vector<Blob<Dtype>*>& top,
-                                       int_tp blockWidth,
-                                       int_tp blockHeight,
-                                       int_tp blockDepth);
   virtual void setup_convolution(const vector<Blob<Dtype>*>& bottom,
-                                 const vector<Blob<Dtype>*>& top);
+                                 const vector<Blob<Dtype>*>& top,
+                                 const Blob<Dtype> &verify_blob);
   virtual void create_convolution_kernel(const vector<Blob<Dtype>*>& bottom,
                                          const vector<Blob<Dtype>*>& top,
                                          int_tp kernelType,
@@ -150,30 +141,35 @@ class ConvolutionLayerSpatial : public BaseConvolutionLayer<Dtype> {
                                    int_tp blockWidth,
                                    int_tp blockHeight,
                                    int_tp blockDepth);
-  virtual bool create_verification_kernel(const vector<Blob<Dtype>*>& bottom,
-                                          const vector<Blob<Dtype>*>& top);
+  virtual bool create_gemm_like_conv_kernel(const vector<Blob<Dtype>*>& bottom,
+                                   const vector<Blob<Dtype>*>& top,
+                                   int_tp blockWidth,
+                                   int_tp blockHeight,
+                                   int_tp blockDepth);
+
   virtual cl_int convolve(const vector<Blob<Dtype>*>& bottom,
                           const vector<Blob<Dtype>*>& top, int_tp index,
                           int_tp numImages,
                           kernelConfig* config);
-  virtual cl_int batched_convolve(const vector<Blob<Dtype>*>& bottom,
-                                  const vector<Blob<Dtype>*>& top, int_tp index,
-                                  int_tp numImages,
-                                  kernelConfig* config);
   virtual float timed_convolve(const vector<Blob<Dtype>*>& bottom,
                                const vector<Blob<Dtype>*>& top, int_tp index,
                                int_tp numImages,
                                kernelConfig* config);
   virtual bool verify_result(const vector<Blob<Dtype>*>& bottom,
                              const vector<Blob<Dtype>*>& top, int_tp index,
-                             int_tp numImages,
+                             int_tp numImages, const Blob<Dtype> &verify_blob,
                              kernelConfig* config);
   virtual bool tune_local_size(const vector<Blob<Dtype>*>& bottom,
                                const vector<Blob<Dtype>*>& top, kernelConfig*);
-  virtual void swizzleWeights(int_tp swizzle_factor);
-  virtual void pad_image(int_tp image_offset, kernelConfig* config,
-  int_tp imgNum);
-  virtual void generate_key();
+  virtual void swizzleWeights(const vector<Blob<Dtype>*>& bottom,
+                              const vector<Blob<Dtype>*>& top,
+                              int_tp swizzle_factor,
+                              bool interleave = false);
+  virtual void pad_image(const vector<Blob<Dtype>*>& bottom,
+                         const vector<Blob<Dtype>*>& top,
+                         int_tp image_offset, kernelConfig* config,
+                         int_tp imgNum);
+  virtual void generate_key(bool need_padding = true);
   virtual std::string generate_unique_key();
   virtual std::string generate_specific_key(int_tp type, int_tp blockWidth,
   int_tp blockHeight,
@@ -184,6 +180,18 @@ class ConvolutionLayerSpatial : public BaseConvolutionLayer<Dtype> {
                            const vector<Blob<Dtype>*>& top);
   void SetUp(const vector<Blob<Dtype>*>& bottom,
              const vector<Blob<Dtype>*>& top, caffe::Backend backend);
+  void setBufferKernelArg(const vector<Blob<Dtype>*>& bottom,
+                          const vector<Blob<Dtype>*>& top,
+                          viennacl::ocl::kernel *cl_kernel,
+                          const cl_uint &argIdx,
+                          viennacl::ocl::context *ctx,
+                          cl_mem buffer, size_t offset,
+                          size_t size, bool readOnly,
+                          bool preserved);
+  void cleanTmpSubBuffers(const vector<Blob<Dtype>*>& bottom,
+                          const vector<Blob<Dtype>*>& top);
+  std::map<std::tuple<cl_mem, size_t, size_t>, cl_mem> subBufferMap;
+  std::vector<cl_mem> tmpSubBuffers;
 #endif
 #endif
 
@@ -191,7 +199,8 @@ class ConvolutionLayerSpatial : public BaseConvolutionLayer<Dtype> {
   Dtype* top_data;
   Dtype* col_data;
   const Dtype* weight;
-  Dtype* swizzled_weights;
+  const Dtype* weight_cpu;
+  Dtype* swizzled_weights_;
   int_tp weight_offset;
   int_tp col_offset;
   int_tp top_offset;
@@ -221,20 +230,25 @@ class ConvolutionLayerSpatial : public BaseConvolutionLayer<Dtype> {
   int_tp N_;
 
   bool tuned_;
+  // if need_padding_ is true, we need to pad the input image,
+  // otherwise, we don't need to pad it then the convolution kernel
+  // need to handle it.
+  bool need_padding_;
 
   std::string key_;
   std::string kernel_name_;
-  std::string verification_kernel;
   Blob<Dtype> spatial_col_buffer_;
-  Blob<Dtype> swizzled_weights_;
+  Blob<Dtype> swizzled_weights_blob_;
   Blob<Dtype> bias_multiplier_;
 
   int_tp kernel_index_;
   int_tp kernel_uid_;
 
   vector<kernelConfig*> kernelQueue;
+  kernelConfig* bestKernelConfig;
 };
 
 }  // namespace caffe
 
 #endif  // CAFFE_CONV_SPATIAL_LAYER_HPP_
+#endif  // USE_INTEL_SPATIAL

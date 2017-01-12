@@ -14,6 +14,9 @@ USE_GREENTEA := 1
 # Enable the Greentea-LibDNN convolution backend
 # USE_LIBDNN := 1
 
+# Enable the Intel spatial convolutions
+# USE_INTEL_SPATIAL := 1
+
 # Folder of the ViennaCL header-only library
 VIENNACL_DIR = ../ViennaCL
 
@@ -40,6 +43,9 @@ VIENNACL_DIR = ../ViennaCL
 
 # CPU-only switch (uncomment to build without GPU support).
 # CPU_ONLY := 1
+
+# CPU OpenMP switch. Do not use OpenMP on dual socket systems!
+USE_OPENMP := 1
 
 # uncomment to disable IO dependencies and corresponding data layers
 # USE_OPENCV := 0
@@ -78,7 +84,7 @@ CUDA_ARCH := -gencode arch=compute_20,code=sm_20 \
 		-gencode arch=compute_30,code=sm_30 \
 		-gencode arch=compute_35,code=sm_35 \
 		-gencode arch=compute_50,code=sm_50 \
-		-gencode arch=compute_50,code=compute_50
+		-gencode arch=compute_60,code=sm_60
 
 # BLAS choice:
 # atlas for ATLAS (default)

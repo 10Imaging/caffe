@@ -85,7 +85,7 @@ Classifier::Classifier(const string& model_file,
   CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
 
   Blob<float>* input_layer = net_->input_blobs()[0];
-  num_channels_ = input_layer->channels();
+  num_channels_ = input_layer->shape(1);
   CHECK(num_channels_ == 3 || num_channels_ == 1)
     << "Input layer should have 1 or 3 channels.";
   input_geometry_ = cv::Size(input_layer->width(), input_layer->height());
@@ -101,7 +101,7 @@ Classifier::Classifier(const string& model_file,
     labels_.push_back(string(line));
 
   Blob<float>* output_layer = net_->output_blobs()[0];
-  CHECK_EQ(labels_.size(), output_layer->channels())
+  CHECK_EQ(labels_.size(), output_layer->shape(1))
     << "Number of labels is different from the output layer dimension.";
 }
 
@@ -113,8 +113,9 @@ static bool PairCompare(const std::pair<float, int_tp>& lhs,
 /* Return the indices of the top N values of vector v. */
 static std::vector<int_tp> Argmax(const std::vector<float>& v, int_tp N) {
   std::vector<std::pair<float, int_tp> > pairs;
-  for (uint_tp i = 0; i < v.size(); ++i)
-    pairs.push_back(std::make_pair(v[i], i));
+  for (size_t i = 0; i < v.size(); ++i) {
+    pairs.push_back(std::make_pair(v[i], static_cast<int_tp>(i)));
+  }
   std::partial_sort(pairs.begin(), pairs.begin() + N, pairs.end(), PairCompare);
 
   std::vector<int_tp> result;
@@ -146,7 +147,7 @@ void Classifier::SetMean(const string& mean_file) {
   /* Convert from BlobProto to Blob<float> */
   Blob<float> mean_blob;
   mean_blob.FromProto(blob_proto);
-  CHECK_EQ(mean_blob.channels(), num_channels_)
+  CHECK_EQ(mean_blob.shape(1), num_channels_)
     << "Number of channels of mean file doesn't match input layer.";
 
   /* The format of the mean file is planar 32-bit float BGR or grayscale. */
@@ -186,7 +187,7 @@ std::vector<float> Classifier::Predict(const cv::Mat& img) {
   /* Copy the output layer to a std::vector */
   Blob<float>* output_layer = net_->output_blobs()[0];
   const float* begin = output_layer->cpu_data();
-  const float* end = begin + output_layer->channels();
+  const float* end = begin + output_layer->shape(1);
   return std::vector<float>(begin, end);
 }
 
@@ -201,7 +202,7 @@ void Classifier::WrapInputLayer(std::vector<cv::Mat>* input_channels) {
   int_tp width = input_layer->width();
   int_tp height = input_layer->height();
   float* input_data = input_layer->mutable_cpu_data();
-  for (int_tp i = 0; i < input_layer->channels(); ++i) {
+  for (int_tp i = 0; i < input_layer->shape(1); ++i) {
     cv::Mat channel(height, width, CV_32FC1, input_data);
     input_channels->push_back(channel);
     input_data += width * height;
@@ -212,7 +213,7 @@ void Classifier::Preprocess(const cv::Mat& img,
                             std::vector<cv::Mat>* input_channels) {
   /* Convert the input image to the input image format of the network. */
   cv::Mat sample;
-  if (img.channels() == 3 && num_channels_ == 1)
+  if (img.channels()== 3 && num_channels_ == 1)
     cv::cvtColor(img, sample, cv::COLOR_BGR2GRAY);
   else if (img.channels() == 4 && num_channels_ == 1)
     cv::cvtColor(img, sample, cv::COLOR_BGRA2GRAY);

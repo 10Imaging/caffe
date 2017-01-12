@@ -51,6 +51,8 @@ void Timer::Start() {
             Caffe::GetDefaultDevice()->id());
         viennacl::ocl::program &program = Caffe::GetDefaultDevice()->program();
         viennacl::ocl::kernel &kernel = program.get_kernel("null_kernel_float");
+        float arg = 0;
+        clSetKernelArg(kernel.handle().get(), 0, sizeof(arg), &arg);
         clEnqueueTask(ctx.get_queue().handle().get(), kernel.handle().get(), 0,
                         NULL, &start_gpu_cl_);
         clFinish(ctx.get_queue().handle().get());
@@ -74,7 +76,6 @@ void Timer::Stop() {
 #ifdef USE_CUDA
       if (Caffe::GetDefaultDevice()->backend() == BACKEND_CUDA) {
         CUDA_CHECK(cudaEventRecord(stop_gpu_cuda_, 0));
-        CUDA_CHECK(cudaEventSynchronize(stop_gpu_cuda_));
       }
 #endif  // USE_CUDA
 #ifdef USE_GREENTEA
@@ -85,6 +86,8 @@ void Timer::Stop() {
             Caffe::GetDefaultDevice()->id());
         viennacl::ocl::program &program = Caffe::GetDefaultDevice()->program();
         viennacl::ocl::kernel &kernel = program.get_kernel("null_kernel_float");
+        float arg = 0;
+        clSetKernelArg(kernel.handle().get(), 0, sizeof(arg), &arg);
         clEnqueueTask(ctx.get_queue().handle().get(), kernel.handle().get(), 0,
                         NULL, &stop_gpu_cl_);
         clFinish(ctx.get_queue().handle().get());
@@ -112,6 +115,7 @@ float Timer::MicroSeconds() {
 #ifndef CPU_ONLY
 #ifdef USE_CUDA
     if (Caffe::GetDefaultDevice()->backend() == BACKEND_CUDA) {
+      CUDA_CHECK(cudaEventSynchronize(stop_gpu_cuda_));
       CUDA_CHECK(cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_cuda_,
               stop_gpu_cuda_));
       // Cuda only measure milliseconds
@@ -151,6 +155,7 @@ float Timer::MilliSeconds() {
 #ifndef CPU_ONLY
 #ifdef USE_CUDA
     if (Caffe::GetDefaultDevice()->backend() == BACKEND_CUDA) {
+      CUDA_CHECK(cudaEventSynchronize(stop_gpu_cuda_));
       CUDA_CHECK(cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_cuda_,
               stop_gpu_cuda_));
     }
@@ -191,7 +196,6 @@ void Timer::Init() {
 #endif  // USE_CUDA
 #ifdef USE_GREENTEA
       if (Caffe::GetDefaultDevice()->backend() == BACKEND_OpenCL) {
-        viennacl::ocl::context& ctx = viennacl::ocl::current_context();
         start_gpu_cl_ = 0;
         stop_gpu_cl_ = 0;
       }

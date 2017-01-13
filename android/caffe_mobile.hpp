@@ -25,6 +25,8 @@ public:
   static CaffeMobile *Get();
   static CaffeMobile *Get(const string &model_path, const string &weights_path);
 
+  void UnLoad();
+
   void SetMean(const string &mean_file);
 
   void SetMean(const vector<float> &mean_values);

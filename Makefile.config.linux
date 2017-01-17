@@ -28,7 +28,7 @@ USE_CUDNN := 1
 CUDA_DIR := /usr/local/cuda
 # On Ubuntu 14.04, if cuda tools are installed via
 # "sudo apt-get install nvidia-cuda-toolkit" then use this instead:
-# CUDA_DIR := /usr
+#CUDA_DIR := /usr/cuda
 
 # CUDA architecture setting: going with all of them.
 # For CUDA < 6.0, comment the *_50 lines for compatibility.
@@ -47,12 +47,12 @@ BLAS := open
 # Custom (MKL/ATLAS/OpenBLAS) include and lib directories.
 # Leave commented to accept the defaults for your choice of BLAS
 # (which should work)!
-#BLAS_INCLUDE := /path/to/your/blas
+# BLAS_INCLUDE := /path/to/your/blas
 # BLAS_LIB := /path/to/your/blas
 
 # Homebrew puts openblas in a directory that is not on the standard search path
-BLAS_INCLUDE := $(shell brew --prefix openblas)/include
-BLAS_LIB := $(shell brew --prefix openblas)/lib
+# BLAS_INCLUDE := $(shell brew --prefix openblas)/include
+# BLAS_LIB := $(shell brew --prefix openblas)/lib
 
 # This is required only if you will compile the matlab interface.
 # MATLAB directory should contain the mex binary in /bin.
@@ -61,8 +61,7 @@ BLAS_LIB := $(shell brew --prefix openblas)/lib
 
 # NOTE: this is required only if you will compile the python interface.
 # We need to be able to find Python.h and numpy/arrayobject.h.
-PYTHON_INCLUDE := /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/include/python2.7 /usr/local/lib/python2.7/site-packages/numpy/core/include
-#/usr/include/python2.7 /usr/lib/python2.7/dist-packages/numpy/core/include
+PYTHON_INCLUDE :=  /usr/include/python2.7 /usr/lib/python2.7/dist-packages/numpy/core/include
 # Anaconda Python distribution is quite popular. Include path:
 # Verify anaconda location, sometimes it's in root.
 # ANACONDA_HOME := $(HOME)/anaconda
@@ -75,19 +74,19 @@ PYTHON_INCLUDE := /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Ve
 # PYTHON_LIB := $(ANACONDA_HOME)/lib
 
 # Homebrew installs numpy in a non standard path (keg only)
-PYTHON_INCLUDE += $(dir $(shell python -c 'import numpy.core; print(numpy.core.__file__)'))/include
-PYTHON_LIB += $(shell brew --prefix numpy)/lib
+#PYTHON_INCLUDE += $(dir $(shell python -c 'import numpy.core; print(numpy.core.__file__)'))/include
+#PYTHON_LIB += $(shell brew --prefix numpy)/lib
 
 # Uncomment to support layers written in Python (will link against Python libs)
 WITH_PYTHON_LAYER := 1
 
 # Whatever else you find you need goes here.
-INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include
 LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib
 
 # If Homebrew is installed at a non standard location (for example your home directory) and you use it for general dependencies
-INCLUDE_DIRS += $(shell brew --prefix)/include
-LIBRARY_DIRS += $(shell brew --prefix)/lib
+# INCLUDE_DIRS += $(shell brew --prefix)/include
+# LIBRARY_DIRS += $(shell brew --prefix)/lib
 
 # Uncomment to use `pkg-config` to specify OpenCV library paths.
 # (Usually not necessary -- OpenCV libraries are normally installed in one of the above $LIBRARY_DIRS.)

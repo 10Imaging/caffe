@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 # Usage parse_log.sh caffe.log
 # It creates the following two text files, each containing a table:
 #     caffe.log.test (columns: '#Iters Seconds TestAccuracy TestLoss')
@@ -8,6 +8,9 @@
 # get the dirname of the script
 DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
+EXTRA_PARMS=""
+[[ "$OSTYPE" == *darwin* ]] && EXTRA_PARMS=".bak"
+
 if [ "$#" -lt 1 ]
 then
 echo "Usage parse_log.sh /path/to/your.log"
@@ -15,11 +18,11 @@ exit
 fi
 LOG=`basename $1`
 sed -n '/Iteration .* Testing net/,/Iteration *. loss/p' $1 > aux.txt
-sed -i '/Waiting for data/d' aux.txt
-sed -i '/prefetch queue empty/d' aux.txt
-sed -i '/Iteration .* loss/d' aux.txt
-sed -i '/Iteration .* lr/d' aux.txt
-sed -i '/Train net/d' aux.txt
+sed -i ${EXTRA_PARMS} '/Waiting for data/d' aux.txt
+sed -i ${EXTRA_PARMS} '/prefetch queue empty/d' aux.txt
+sed -i ${EXTRA_PARMS} '/Iteration .* loss/d' aux.txt
+sed -i ${EXTRA_PARMS} '/Iteration .* lr/d' aux.txt
+sed -i ${EXTRA_PARMS} '/Train net/d' aux.txt
 grep 'Iteration ' aux.txt | sed  's/.*Iteration \([[:digit:]]*\).*/\1/g' > aux0.txt
 grep 'Test net output #0' aux.txt | awk '{print $11}' > aux1.txt
 grep 'Test net output #1' aux.txt | awk '{print $11}' > aux2.txt
@@ -48,4 +51,4 @@ $DIR/extract_seconds.py aux.txt aux3.txt
 # Generating
 echo '#Iters Seconds TrainingLoss LearningRate'> $LOG.train
 paste aux0.txt aux3.txt aux1.txt aux2.txt | column -t >> $LOG.train
-rm aux.txt aux0.txt aux1.txt aux2.txt  aux3.txt
+#rm aux.txt aux0.txt aux1.txt aux2.txt  aux3.txt

@@ -51,4 +51,4 @@ $DIR/extract_seconds.py aux.txt aux3.txt
 # Generating
 echo '#Iters Seconds TrainingLoss LearningRate'> $LOG.train
 paste aux0.txt aux3.txt aux1.txt aux2.txt | column -t >> $LOG.train
-#rm aux.txt aux0.txt aux1.txt aux2.txt  aux3.txt
+rm aux.txt aux0.txt aux1.txt aux2.txt  aux3.txt

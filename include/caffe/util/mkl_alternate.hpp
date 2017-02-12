@@ -7,42 +7,13 @@
 
 #else  // If use MKL, simply include the MKL header
 
-#ifdef USE_EIGEN
-
-#include <Eigen/Dense>
-
-using Eigen::Map;
-using Eigen::VectorXf;
-using Eigen::VectorXd;
-using Eigen::Dynamic;
-using Eigen::Matrix;
-using Eigen::RowMajor;
-using Eigen::InnerStride;
-
-enum CBLAS_ORDER { CblasRowMajor = 101, CblasColMajor = 102 };
-enum CBLAS_TRANSPOSE { CblasNoTrans = 111, CblasTrans = 112, CblasConjTrans = 113 };
-
-#define MAP_SVECTOR(name, ptr, N) Map<VectorXf> name(ptr, N)
-#define MAP_CONST_SVECTOR(name, ptr, N) Map<const VectorXf> name(ptr, N)
-#define MAP_CONST_SVECTOR_STRIDE(name, ptr, N, S) Map<const VectorXf, 0, InnerStride<> > name(ptr, N, InnerStride<>(S))
-#define MAP_DVECTOR(name, ptr, N) Map<VectorXd> name(ptr, N)
-#define MAP_CONST_DVECTOR(name, ptr, N) Map<const VectorXd> name(ptr, N)
-#define MAP_CONST_DVECTOR_STRIDE(name, ptr, N, S) Map<const VectorXd, 0, InnerStride<> > name(ptr, N, InnerStride<>(S))
-typedef Matrix<float, Dynamic, Dynamic, RowMajor> MatXf;
-typedef Matrix<double, Dynamic, Dynamic, RowMajor> MatXd;
-
-#define MAP_SMATRIX(name, ptr, M, N) Map<MatXf> name(ptr, M, N)
-#define MAP_CONST_SMATRIX(name, ptr, M, N) Map<const MatXf> name(ptr, M, N)
-#define MAP_DMATRIX(name, ptr, M, N) Map<MatXd> name(ptr, M, N)
-#define MAP_CONST_DMATRIX(name, ptr, M, N) Map<const MatXd> name(ptr, M, N)
-
+#ifdef USE_ACCELERATE
+#include <Accelerate/Accelerate.h>
 #else
-
 extern "C" {
 #include <cblas.h>
 }
-
-#endif  // USE_EIGEN
+#endif  // USE_ACCELERATE
 
 #include <math.h>
 

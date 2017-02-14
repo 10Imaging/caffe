@@ -8,6 +8,7 @@
 
 #include "caffe/caffe.hpp"
 #include "caffe/layers/memory_data_layer.hpp"
+
 #include "caffe_mobile.hpp"
 
 #include <opencv2/core/core.hpp>
@@ -77,11 +78,10 @@ CaffeMobile::CaffeMobile(const string &model_path, const string &weights_path) {
   Caffe::set_mode(Caffe::CPU);
 
   clock_t t_start = clock();
-  net_.reset(new Net<float>(model_path, caffe::TEST));
+  net_.reset(new Net<float>(model_path, TEST, Caffe::GetDefaultDevice()));
   net_->CopyTrainedLayersFrom(weights_path);
   clock_t t_end = clock();
-  VLOG(1) << "Loading time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC
-          << " ms.";
+//  LOG(INFO) << "Loading time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC << " ms.";
 
   CHECK_EQ(net_->num_inputs(), 1) << "Network should have exactly one input.";
   CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
@@ -93,6 +93,11 @@ CaffeMobile::CaffeMobile(const string &model_path, const string &weights_path) {
   input_geometry_ = cv::Size(input_layer->width(), input_layer->height());
 
   scale_ = 0.0;
+}
+
+void CaffeMobile::UnLoad() {
+    delete caffe_mobile_;
+    caffe_mobile_ = nullptr;
 }
 
 CaffeMobile::~CaffeMobile() { net_.reset(); }
@@ -144,12 +149,11 @@ void CaffeMobile::SetScale(const float scale) {
   CHECK_GT(scale, 0);
   scale_ = scale;
 }
-    
+
 void CaffeMobile::Preprocess(const cv::Mat &img,
                              std::vector<cv::Mat> *input_channels) {
   /* Convert the input image to the input image format of the network. */
   cv::Mat sample;
-
   if (img.channels() == 3 && num_channels_ == 1)
     cv::cvtColor(img, sample, cv::COLOR_BGR2GRAY);
   else if (img.channels() == 4 && num_channels_ == 1)
@@ -160,7 +164,6 @@ void CaffeMobile::Preprocess(const cv::Mat &img,
     cv::cvtColor(img, sample, cv::COLOR_GRAY2BGR);
   else
     sample = img;
-    
 
   cv::Mat sample_resized;
   if (sample.size() != input_geometry_)
@@ -221,16 +224,14 @@ vector<float> CaffeMobile::Forward(cv::Mat img) {
                              input_geometry_.width);
     /* Forward dimension change to all layers. */
     net_->Reshape();
-        
     vector<cv::Mat> input_channels;
     WrapInputLayer(&input_channels);
         
     Preprocess(img, &input_channels);
-        
     clock_t t_start = clock();
     net_->ForwardPrefilled();
     clock_t t_end = clock();
-    VLOG(1) << "Forwarding time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC<< " ms.";
+    //VLOG(1) << "Forwarding time: " << 1000.0 * (t_end - t_start) / CLOCKS_PER_SEC<< " ms.";
         
     /* Copy the output layer to a std::vector */
     Blob<float> *output_layer = net_->output_blobs()[0];
@@ -287,26 +288,4 @@ CaffeMobile::ExtractFeatures(const string &img_path,
   return features;
 }
 
-
 } // namespace caffe
-
-/*
-using caffe::CaffeMobile;
-
-int main(int argc, char const *argv[]) {
-  string usage("usage: main <model> <weights> <mean_file> <img>");
-  if (argc < 5) {
-    std::cerr << usage << std::endl;
-    return 1;
-  }
-
-  CaffeMobile *caffe_mobile =
-      CaffeMobile::Get(string(argv[1]), string(argv[2]));
-  caffe_mobile->SetMean(string(argv[3]));
-  vector<int> top_3 = caffe_mobile->PredictTopK(string(argv[4]), 3);
-  for (auto i : top_3) {
-    std::cout << i << std::endl;
-  }
-  return 0;
-}
-*/

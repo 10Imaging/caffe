@@ -145,13 +145,7 @@ void caffe_scal<double>(const int_tp N, const double alpha, double *X) {
 template<>
 void caffe_cpu_axpby<float>(const int_tp N, const float alpha, const float* X,
                             const float beta, float* Y) {
-#ifdef USE_EIGEN
-  MAP_SVECTOR(eY, Y, N);
-  MAP_CONST_SVECTOR(eX, X, N);
-  eY = alpha * eX + beta * eY;
-#else
   cblas_saxpby(N, alpha, X, 1, beta, Y, 1);
-#endif
 }
 
 template<>
@@ -414,14 +408,8 @@ double caffe_cpu_asum<double>(const int_tp n, const double* x) {
 template<>
 void caffe_cpu_scale<float>(const int_tp n, const float alpha, const float *x,
                             float* y) {
-#ifdef USE_EIGEN
-  memcpy(y, x, sizeof(float)*n);
-  MAP_SVECTOR(eY, y, n);
-  eY *= alpha;
-#else
   cblas_scopy(n, x, 1, y, 1);
   cblas_sscal(n, alpha, y, 1);
-#endif
 }
 
 template<>

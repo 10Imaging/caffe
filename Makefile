@@ -43,7 +43,7 @@ LIB_BUILD_DIR := $(BUILD_DIR)/lib
 STATIC_NAME := $(LIB_BUILD_DIR)/lib$(LIBRARY_NAME).a
 DYNAMIC_VERSION_MAJOR 		:= 1
 DYNAMIC_VERSION_MINOR 		:= 0
-DYNAMIC_VERSION_REVISION 	:= 0-rc3
+DYNAMIC_VERSION_REVISION 	:= 0-rc4
 DYNAMIC_NAME_SHORT := lib$(LIBRARY_NAME).so
 #DYNAMIC_SONAME_SHORT := $(DYNAMIC_NAME_SHORT).$(DYNAMIC_VERSION_MAJOR)
 DYNAMIC_VERSIONED_NAME_SHORT := $(DYNAMIC_NAME_SHORT).$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR).$(DYNAMIC_VERSION_REVISION)
@@ -189,7 +189,7 @@ ifeq ($(USE_CUDA), 1)
 	LIBRARIES := cudart cublas curand nvrtc cuda
 endif
 
-LIBRARIES += gflags protobuf boost_system boost_filesystem m
+LIBRARIES += glog gflags protobuf boost_system boost_filesystem m
 
 # handle IO dependencies
 USE_LEVELDB ?= 1
@@ -448,9 +448,10 @@ ifeq ($(USE_CUDNN), 1)
 	COMMON_FLAGS += -DUSE_CUDNN
 endif
 
-# glog configuration.
-ifeq ($(USE_GLOG), 1)
-	COMMON_FLAGS += -DUSE_GLOG
+# NCCL acceleration configuration
+ifeq ($(USE_NCCL), 1)
+	LIBRARIES += nccl
+	COMMON_FLAGS += -DUSE_NCCL
 endif
 
 # configure IO libraries

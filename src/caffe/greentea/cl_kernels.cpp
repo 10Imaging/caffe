@@ -6,13 +6,18 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#ifdef DISABLE_DOUBLE_SUPPORT
+  #define DOUBLE_SUPPORT "#define DISABLE_DOUBLE_SUPPORT\n"
+#else
+  #define DOUBLE_SUPPORT "#define ENABLE_DOUBLE_SUPPORT\n"
+#endif //DISABLE_DOUBLE_SUPPORT
 namespace caffe {
 #ifdef USE_INDEX_64
-static std::string header = "#ifndef __OPENCL_VERSION__\n#define __kernel\n#define __global\n#define __constant\n#define __local\n#define get_global_id(x) 0\n#define get_global_size(x) 0\n#define get_local_id(x) 0\n#define get_local_size(x) 0\n#define FLT_MAX 0\n#define FLT_MIN 0\n#define cl_khr_fp64\n#define cl_amd_fp64\n#define DOUBLE_SUPPORT_AVAILABLE\n#define CLK_LOCAL_MEM_FENCE\n#define CLK_GLOBAL_MEM_FENCE\n#define Dtype float\n#define barrier(x)\n#define atomic_cmpxchg(x, y, z) x\n#define signbit(x) x\n#define int_tp long\n#define uint_tp unsigned long\n#define int_tpc long\n#define uint_tpc unsigned long\n#endif\n\n#define CONCAT(A,B) A##_##B\n#define TEMPLATE(name,type) CONCAT(name,type)\n\n#define TYPE_FLOAT 1\n#define TYPE_DOUBLE 2\n\n#if defined(cl_khr_fp64)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#define DOUBLE_SUPPORT_AVAILABLE\n#elif defined(cl_amd_fp64)\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif\n\n#if defined(cl_khr_int64_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n#define ATOMICS_64_AVAILABLE\n#endif\n\n#if defined(cl_khr_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif\n\n#if defined(cl_khr_global_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_global_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif";  // NOLINT
-static std::string definitions_64 = "// Types used for parameters, offset computations and so on\n#define int_tp long\n#define uint_tp unsigned long\n\n// Definitions used to cast the types above as needed\n#define int_tpc long\n#define uint_tpc unsigned long";  // NOLINT
+static std::string header = DOUBLE_SUPPORT "#ifndef __OPENCL_VERSION__\n#define __kernel\n#define __global\n#define __constant\n#define __local\n#define get_global_id(x) 0\n#define get_global_size(x) 0\n#define get_local_id(x) 0\n#define get_local_size(x) 0\n#define FLT_MAX 0\n#define FLT_MIN 0\n#define cl_khr_fp64\n#define cl_amd_fp64\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#define CLK_LOCAL_MEM_FENCE\n#define CLK_GLOBAL_MEM_FENCE\n#define Dtype float\n#define barrier(x)\n#define atomic_cmpxchg(x, y, z) x\n#define signbit(x) x\n#define int_tp long\n#define uint_tp unsigned long\n#define int_tpc long\n#define uint_tpc unsigned long\n#endif\n\n#define CONCAT(A,B) A##_##B\n#define TEMPLATE(name,type) CONCAT(name,type)\n\n#define TYPE_FLOAT 1\n#define TYPE_DOUBLE 2\n\n#if defined(cl_khr_fp64)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#elif defined(cl_amd_fp64)\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#endif\n\n#if defined(cl_khr_int64_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n#define ATOMICS_64_AVAILABLE\n#endif\n\n#if defined(cl_khr_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif\n\n#if defined(cl_khr_global_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_global_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif";  // NOLINT
+static std::string definitions_64 = DOUBLE_SUPPORT "// Types used for parameters, offset computations and so on\n#define int_tp long\n#define uint_tp unsigned long\n\n// Definitions used to cast the types above as needed\n#define int_tpc long\n#define uint_tpc unsigned long";  // NOLINT
 #else
-static std::string header = "#ifndef __OPENCL_VERSION__\n#define __kernel\n#define __global\n#define __constant\n#define __local\n#define get_global_id(x) 0\n#define get_global_size(x) 0\n#define get_local_id(x) 0\n#define get_local_size(x) 0\n#define FLT_MAX 0\n#define FLT_MIN 0\n#define cl_khr_fp64\n#define cl_amd_fp64\n#define DOUBLE_SUPPORT_AVAILABLE\n#define CLK_LOCAL_MEM_FENCE\n#define CLK_GLOBAL_MEM_FENCE\n#define Dtype float\n#define barrier(x)\n#define atomic_cmpxchg(x, y, z) x\n#define signbit(x) x\n#define int_tp long\n#define uint_tp unsigned long\n#define int_tpc long\n#define uint_tpc unsigned long\n#endif\n\n#define CONCAT(A,B) A##_##B\n#define TEMPLATE(name,type) CONCAT(name,type)\n\n#define TYPE_FLOAT 1\n#define TYPE_DOUBLE 2\n\n#if defined(cl_khr_fp64)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#define DOUBLE_SUPPORT_AVAILABLE\n#elif defined(cl_amd_fp64)\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif\n\n#if defined(cl_khr_int64_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n#define ATOMICS_64_AVAILABLE\n#endif\n\n#if defined(cl_khr_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif\n\n#if defined(cl_khr_global_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_global_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif";  // NOLINT
-static std::string definitions_32 = "// Types used for parameters, offset computations and so on\n#define int_tp int\n#define uint_tp unsigned int\n\n// Definitions used to cast the types above as needed\n#define int_tpc int\n#define uint_tpc unsigned int";  // NOLINT
+static std::string header = DOUBLE_SUPPORT "#ifndef __OPENCL_VERSION__\n#define __kernel\n#define __global\n#define __constant\n#define __local\n#define get_global_id(x) 0\n#define get_global_size(x) 0\n#define get_local_id(x) 0\n#define get_local_size(x) 0\n#define FLT_MAX 0\n#define FLT_MIN 0\n#define cl_khr_fp64\n#define cl_amd_fp64\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#define CLK_LOCAL_MEM_FENCE\n#define CLK_GLOBAL_MEM_FENCE\n#define Dtype float\n#define barrier(x)\n#define atomic_cmpxchg(x, y, z) x\n#define signbit(x) x\n#define int_tp long\n#define uint_tp unsigned long\n#define int_tpc long\n#define uint_tpc unsigned long\n#endif\n\n#define CONCAT(A,B) A##_##B\n#define TEMPLATE(name,type) CONCAT(name,type)\n\n#define TYPE_FLOAT 1\n#define TYPE_DOUBLE 2\n\n#if defined(cl_khr_fp64)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#elif defined(cl_amd_fp64)\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#endif\n\n#if defined(cl_khr_int64_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n#define ATOMICS_64_AVAILABLE\n#endif\n\n#if defined(cl_khr_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif\n\n#if defined(cl_khr_global_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_global_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif";  // NOLINT
+static std::string definitions_32 = DOUBLE_SUPPORT "// Types used for parameters, offset computations and so on\n#define int_tp int\n#define uint_tp unsigned int\n\n// Definitions used to cast the types above as needed\n#define int_tpc int\n#define uint_tpc unsigned int";  // NOLINT
 #endif
 static std::vector<std::vector<std::string>> cl_kernels{
     {"#ifndef __OPENCL_VERSION__",    // NOLINT
@@ -138,7 +143,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "counts[i] = 0.0;",    // NOLINT
 "} else {",    // NOLINT
 "loss[i] = input_data[i] * (target[i] - (input_data[i] >= 0.0)) -",    // NOLINT
-"log(1.0 + exp(input_data[i] - 2.0 * input_data[i] *",    // NOLINT
+"log((Dtype)1.0 + exp(input_data[i] - (Dtype)2.0 * input_data[i] *",    // NOLINT
 "(input_data[i] >= 0.0)));",    // NOLINT
 "counts[i] = 1.0;",    // NOLINT
 "}",    // NOLINT
@@ -1950,11 +1955,10 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "#include \"header.cl\"",    // NOLINT
 "#endif",    // NOLINT
 "",    // NOLINT
-"__kernel void TEMPLATE(crop_copy, Dtype)(const int_tp n, const int_tp height,",    // NOLINT
+"__kernel void TEMPLATE(crop_copy, Dtype)(const int_tp n,",    // NOLINT
+"const int_tp height,",    // NOLINT
 "const int_tp width,",    // NOLINT
-"const int_tp src_outer_stride,",    // NOLINT
 "const int_tp src_inner_stride,",    // NOLINT
-"const int_tp dest_outer_stride,",    // NOLINT
 "const int_tp dest_inner_stride,",    // NOLINT
 "__global const Dtype* src,",    // NOLINT
 "const int_tp src_off,",    // NOLINT
@@ -1962,12 +1966,10 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "const int_tp dest_off) {",    // NOLINT
 "for (int_tp index = get_global_id(0); index < n;",    // NOLINT
 "index += get_global_size(0)) {",    // NOLINT
-"int_tp src_start = index / height * src_outer_stride",    // NOLINT
-"+ index % height * src_inner_stride;",    // NOLINT
-"int_tp dest_start = index / height * dest_outer_stride",    // NOLINT
-"+ index % height * dest_inner_stride;",    // NOLINT
+"int_tp src_start = index * src_inner_stride + src_off;",    // NOLINT
+"int_tp dest_start = index * dest_inner_stride + dest_off;",    // NOLINT
 "for (int_tp i = 0; i < width; ++i) {",    // NOLINT
-"dest[dest_off + dest_start + i] = src[src_off + src_start + i];",    // NOLINT
+"dest[dest_start + i] = src[src_start + i];",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
@@ -4320,7 +4322,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "size_prod *= size[i];",    // NOLINT
 "}",    // NOLINT
 "",    // NOLINT
-"if (bottom_data[offset + final_offset] > maxval) {",    // NOLINT
+"if (bottom_data[final_offset + offset] > maxval) {",    // NOLINT
 "maxidx = final_offset;",    // NOLINT
 "maxval = bottom_data[offset + final_offset];",    // NOLINT
 "}",    // NOLINT
@@ -4373,6 +4375,9 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// find out the local offset",    // NOLINT
 "int_tp offset = 1;",    // NOLINT
 "int_tp num = index;",    // NOLINT
+"",    // NOLINT
+"bool do_continue = false;",    // NOLINT
+"",    // NOLINT
 "for (i = num_axes - 1; i >= 0; --i) {",    // NOLINT
 "d_idx[i] = num % size[i];",    // NOLINT
 "d_start[i] =",    // NOLINT
@@ -4386,9 +4391,15 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "",    // NOLINT
 "if (d_start[i] > d_end[i]) {",    // NOLINT
 "bottom_diff[index] = 0;",    // NOLINT
-"return;",    // NOLINT
+"do_continue = true;",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
+"",    // NOLINT
+"if (do_continue) {",    // NOLINT
+"continue;",    // NOLINT
+"}",    // NOLINT
+"",    // NOLINT
+"",    // NOLINT
 "int_tp chan = num % channels;",    // NOLINT
 "num /= channels;",    // NOLINT
 "offset *= (num * channels + chan);",    // NOLINT

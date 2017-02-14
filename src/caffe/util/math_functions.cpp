@@ -38,7 +38,6 @@ void caffe_cpu_gemv<float>(const CBLAS_TRANSPOSE TransA, const int_tp M,
                            const int_tp N, const float alpha, const float* A,
                            const float* x, const float beta, float* y) {
   cblas_sgemv(CblasRowMajor, TransA, M, N, alpha, A, N, x, 1, beta, y, 1);
-#endif
 }
 
 template<>
@@ -46,7 +45,6 @@ void caffe_cpu_gemv<double>(const CBLAS_TRANSPOSE TransA, const int_tp M,
                             const int_tp N, const double alpha, const double* A,
                             const double* x, const double beta, double* y) {
   cblas_dgemv(CblasRowMajor, TransA, M, N, alpha, A, N, x, 1, beta, y, 1);
-#endif
 }
 
 template<>
@@ -137,32 +135,23 @@ template void caffe_copy<double>(const int_tp N, const double* X, double* Y);
 template<>
 void caffe_scal<float>(const int_tp N, const float alpha, float *X) {
   cblas_sscal(N, alpha, X, 1);
-#endif
 }
 
 template<>
 void caffe_scal<double>(const int_tp N, const double alpha, double *X) {
   cblas_dscal(N, alpha, X, 1);
-#endif
 }
 
 template<>
 void caffe_cpu_axpby<float>(const int_tp N, const float alpha, const float* X,
                             const float beta, float* Y) {
-#ifdef USE_EIGEN
-  MAP_SVECTOR(eY, Y, N);
-  MAP_CONST_SVECTOR(eX, X, N);
-  eY = alpha * eX + beta * eY;
-#else
   cblas_saxpby(N, alpha, X, 1, beta, Y, 1);
-#endif
 }
 
 template<>
 void caffe_cpu_axpby<double>(const int_tp N, const double alpha,
                              const double* X, const double beta, double* Y) {
   cblas_daxpby(N, alpha, X, 1, beta, Y, 1);
-#endif
 }
 
 template<>
@@ -386,7 +375,6 @@ float caffe_cpu_strided_dot<float>(const int_tp n, const float* x,
                                    const int_tp incx, const float* y,
                                    const int_tp incy) {
   return cblas_sdot(n, x, incx, y, incy);
-#endif
 }
 
 template<>
@@ -394,7 +382,6 @@ double caffe_cpu_strided_dot<double>(const int_tp n, const double* x,
                                      const int_tp incx, const double* y,
                                      const int_tp incy) {
   return cblas_ddot(n, x, incx, y, incy);
-#endif
 }
 
 template<typename Dtype>
@@ -411,26 +398,18 @@ double caffe_cpu_dot<double>(const int_tp n, const double* x, const double* y);
 template<>
 float caffe_cpu_asum<float>(const int_tp n, const float* x) {
   return cblas_sasum(n, x, 1);
-#endif
 }
 
 template<>
 double caffe_cpu_asum<double>(const int_tp n, const double* x) {
   return cblas_dasum(n, x, 1);
-#endif
 }
 
 template<>
 void caffe_cpu_scale<float>(const int_tp n, const float alpha, const float *x,
                             float* y) {
-#ifdef USE_EIGEN
-  memcpy(y, x, sizeof(float)*n);
-  MAP_SVECTOR(eY, y, n);
-  eY *= alpha;
-#else
   cblas_scopy(n, x, 1, y, 1);
   cblas_sscal(n, alpha, y, 1);
-#endif
 }
 
 template<>
@@ -438,7 +417,6 @@ void caffe_cpu_scale<double>(const int_tp n, const double alpha,
                              const double *x, double* y) {
   cblas_dcopy(n, x, 1, y, 1);
   cblas_dscal(n, alpha, y, 1);
-#endif
 }
 
 }  // namespace caffe

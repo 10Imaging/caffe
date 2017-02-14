@@ -6,7 +6,7 @@
 #include "caffe/caffe.hpp"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-     
+
 using std::string;
 using std::vector;
 
@@ -51,7 +51,7 @@ private:
   void WrapInputLayer(std::vector<cv::Mat> *input_channels);
 
   vector<float> Forward(const string &filename);
-    vector<float> Forward(cv::Mat img);
+  vector<float> Forward(cv::Mat img);
 
   shared_ptr<Net<float>> net_;
   cv::Size input_geometry_;

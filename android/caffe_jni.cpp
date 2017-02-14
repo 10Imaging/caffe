@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#ifdef USE_EIGEN
-#include <omp.h>
-#else
 #include <cblas.h>
-#endif
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "caffe/caffe.hpp"
 #include "caffe_mobile.hpp"
@@ -59,11 +59,7 @@ JNIEXPORT void JNICALL
 Java_com_tenimaging_android_iris_CaffeMobile_setNumThreads(
     JNIEnv *env, jobject thiz, jint numThreads) {
   int num_threads = numThreads;
-#ifdef USE_EIGEN
-  omp_set_num_threads(num_threads);
-#else
   openblas_set_num_threads(num_threads);
-#endif
 }
 
 JNIEXPORT void JNICALL
@@ -72,12 +68,11 @@ Java_com_tenimaging_android_iris_CaffeMobile_enableLog(JNIEnv *env,
                                                          jboolean enabled) {}
 
 JNIEXPORT jint JNICALL Java_com_tenimaging_android_iris_CaffeMobile_loadModel(
-    JNIEnv *env, jobject thiz, jstring modelPath, jstring weightsPath) {
+  JNIEnv *env, jobject thiz, jstring modelPath, jstring weightsPath) {
   CaffeMobile::Get(jstring2string(env, modelPath),
                    jstring2string(env, weightsPath));
   return 0;
 }
-
 
 JNIEXPORT void JNICALL Java_com_tenimaging_android_iris_CaffeMobile_unloadModel(
         JNIEnv *env, jobject thiz) {
@@ -103,13 +98,11 @@ Java_com_tenimaging_android_iris_CaffeMobile_setMeanWithMeanValues(
 }
 
 JNIEXPORT void JNICALL
-Java_com_tenimaging_android_iris_CaffeMobile_setScale(JNIEnv *env,
-                                                        jobject thiz,
-                                                        jfloat scale) {
+Java_com_tenimaging_android_iris_CaffeMobile_setScale(
+  JNIEnv *env, jobject thiz, jfloat scale) {
   CaffeMobile *caffe_mobile = CaffeMobile::Get();
   caffe_mobile->SetScale(scale);
 }
-
 
 jint JNIEXPORT JNICALL
 Java_com_tenimaging_android_iris_CaffeMobile_predictImagePath(JNIEnv* env, jobject thiz, jstring imgPath, jint numResults, jintArray synsetList, jfloatArray probList)

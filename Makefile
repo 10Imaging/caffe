@@ -289,7 +289,6 @@ ifeq ($(OSX), 1)
 		ifeq ($(OSX_10_OR_LATER),true)
 			ifeq ($(OSX_10_5_OR_LATER),true)
 				LDFLAGS += -Wl,-rpath,$(CUDA_LIB_DIR)
-				LINKFLAGS += -lglog
 			endif
 		endif
 	endif

@@ -298,7 +298,7 @@ ifeq ($(OSX), 1)
 	LIBRARIES += boost_thread-mt
 	# we need to explicitly ask for the rpath to be obeyed
 	ORIGIN := @loader_path
-	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../build/lib
+	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../$(BUILD_DIR)/lib
 else
 	ORIGIN := \$$ORIGIN
 endif
@@ -515,7 +515,7 @@ $(PY$(PROJECT)_SO): $(PY$(PROJECT)_SRC) $(PY$(PROJECT)_HXX) | $(DYNAMIC_NAME)
 	@ echo CXX/LD -o $@ $<
 	$(Q)$(CXX) -shared -o $@ $(PY$(PROJECT)_SRC) \
 		-o $@ $(LINKFLAGS) -l$(LIBRARY_NAME) $(PYTHON_LDFLAGS) \
-		-Wl,-rpath,$(ORIGIN)/../../build/lib
+		-Wl,-rpath,$(ORIGIN)/../../$(BUILD_DIR)/lib
 
 mat$(PROJECT): mat
 

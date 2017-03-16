@@ -4,27 +4,6 @@
 # cuDNN acceleration switch (uncomment to build with cuDNN).
 USE_CUDNN := 1
 
-<<<<<<< Updated upstream
-# CPU-only switch (uncomment to build without GPU support).
-# CPU_ONLY := 1
-
-# uncomment to disable IO dependencies and corresponding data layers
-# USE_OPENCV := 0
-# USE_LEVELDB := 0
-# USE_LMDB := 0
-
-# uncomment to allow MDB_NOLOCK when reading LMDB files (only if necessary)
-#	You should not set this flag if you will be reading LMDBs with any
-#	possibility of simultaneous read and write
-# ALLOW_LMDB_NOLOCK := 1
-
-# Uncomment if you're using OpenCV 3
-# OPENCV_VERSION := 3
-
-# To customize your choice of compiler, uncomment and set the following.
-# N.B. the default for Linux is g++ and the default for OSX is clang++
-# CUSTOM_CXX := g++
-=======
 USE_OPENCV := 1
 USE_LMDB := 1
 
@@ -34,27 +13,16 @@ USE_LMDB := 1
 # To customize your choice of compiler, uncomment and set the following.
 # N.B. the default for Linux is g++ and the default for OSX is clang++
 #CUSTOM_CXX := g++
->>>>>>> Stashed changes
 
 # CUDA directory contains bin/ and lib/ directories that we need.
 CUDA_DIR := /usr/local/cuda
 # On Ubuntu 14.04, if cuda tools are installed via
 # "sudo apt-get install nvidia-cuda-toolkit" then use this instead:
-<<<<<<< Updated upstream
-# CUDA_DIR := /usr/cuda
-
-# CUDA architecture setting: going with all of them.
-# For CUDA < 6.0, comment the *_50 lines for compatibility.
-CUDA_ARCH := -gencode arch=compute_20,code=sm_20 \
-		-gencode arch=compute_20,code=sm_21 \
-		-gencode arch=compute_30,code=sm_30 \
-=======
 # CUDA_DIR := /usr
 
 # CUDA architecture setting: going with all of them.
 # For CUDA < 6.0, comment the *_50 lines for compatibility.
 CUDA_ARCH := -gencode arch=compute_30,code=sm_30 \
->>>>>>> Stashed changes
 		-gencode arch=compute_35,code=sm_35 \
 		-gencode arch=compute_50,code=sm_50 \
 		-gencode arch=compute_50,code=compute_50
@@ -81,15 +49,10 @@ BLAS_LIB := $(shell brew --prefix openblas)/lib
 
 # NOTE: this is required only if you will compile the python interface.
 # We need to be able to find Python.h and numpy/arrayobject.h.
-<<<<<<< Updated upstream
-PYTHON_INCLUDE := /usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/include/python2.7 /usr/local/lib/python2.7/site-packages/numpy/core/include
-#PYTHON_INCLUDE := /usr/include/python2.7 /usr/lib/python2.7/dist-packages/numpy/core/include
-=======
 PYTHON_INCLUDE := /usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
 		/usr/local/lib/python2.7/site-packages/numpy/core/include
 #PYTHON_INCLUDE := /usr/include/python2.7 \
 #		/usr/lib/python2.7/dist-packages/numpy/core/include
->>>>>>> Stashed changes
 # Anaconda Python distribution is quite popular. Include path:
 # Verify anaconda location, sometimes it's in root.
 # ANACONDA_HOME := $(HOME)/anaconda
@@ -98,23 +61,6 @@ PYTHON_INCLUDE := /usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Ve
 		# $(ANACONDA_HOME)/lib/python2.7/site-packages/numpy/core/include \
 
 # We need to be able to find libpythonX.X.so or .dylib.
-<<<<<<< Updated upstream
-PYTHON_LIB := /usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/lib
-# PYTHON_LIB := $(ANACONDA_HOME)/lib
-
-# Homebrew installs numpy in a non standard path (keg only)
-PYTHON_INCLUDE += $(dir $(shell python -c 'import numpy.core; print(numpy.core.__file__)'))/include
-PYTHON_LIB += $(shell brew --prefix numpy)/lib
-
-# Uncomment to support layers written in Python (will link against Python libs)
-WITH_PYTHON_LAYER := 1
-
-# Whatever else you find you need goes here.
-INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include
-LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib
-
-# If Homebrew is installed at a non standard location (for example your home directory) and you use it for general dependencies
-=======
 PYTHON_LIB := /usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/lib/
 # PYTHON_LIB := $(ANACONDA_HOME)/lib
 
@@ -132,7 +78,6 @@ LIBRARY_TF_PROTOBUF := ../../../protobuf/lib
 INCLUDE_DIRS := $(PYTHON_INCLUDE) $(INCLUDE_TF_PROTOBUF) $(INCLUDE_HDF5) ${HOME}/include
 LIBRARY_DIRS := $(PYTHON_LIB) $(LIBRARY_TF_PROTOBUF) $(LIBRARY_HDF5) ${HOME}/lib
 
->>>>>>> Stashed changes
 INCLUDE_DIRS += $(shell brew --prefix)/include
 LIBRARY_DIRS += $(shell brew --prefix)/lib
 
@@ -140,19 +85,6 @@ LIBRARY_DIRS += $(shell brew --prefix)/lib
 # (Usually not necessary -- OpenCV libraries are normally installed in one of the above $LIBRARY_DIRS.)
 # USE_PKG_CONFIG := 1
 
-<<<<<<< Updated upstream
-BUILD_DIR := build-cuda
-DISTRIBUTE_DIR := distribute-darwin-cuda
-
-# Uncomment for debugging. Does not work on OSX due to https://github.com/BVLC/caffe/issues/171
-# DEBUG := 1
-
-# The ID of the GPU that 'make runtest' will use to run unit tests.
-TEST_GPUID := 0
-
-# enable pretty build (comment to see full commands)
-Q ?= @
-=======
 BUILD_DIR := build
 DISTRIBUTE_DIR := distribute
 
@@ -161,4 +93,3 @@ DISTRIBUTE_DIR := distribute
 
 # The ID of the GPU that 'make runtest' will use to run unit tests.
 TEST_GPUID := 0
->>>>>>> Stashed changes

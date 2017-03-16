@@ -178,7 +178,7 @@ ifneq ($(CPU_ONLY), 1)
 	LIBRARIES += cudart cublas curand
 endif
 
-LIBRARIES += gflags protobuf boost_system boost_filesystem m
+LIBRARIES += gflags protobuf boost_system boost_filesystem m glog
 
 # handle IO dependencies
 USE_LEVELDB ?= 1
@@ -297,7 +297,7 @@ ifeq ($(OSX), 1)
 	# gtest needs to use its own tuple to not conflict with clang
 	COMMON_FLAGS += -DGTEST_USE_OWN_TR1_TUPLE=1
 	# boost::thread is called boost_thread-mt to mark multithreading on OS X
-	LIBRARIES += boost_thread-mt glog
+	LIBRARIES += boost_thread-mt
 	# we need to explicitly ask for the rpath to be obeyed
 	ORIGIN := @loader_path
 	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../$(BUILD_DIR)/lib

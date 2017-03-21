@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-LABEL maintainer caffe-maint@googlegroups.com
+LABEL maintainer victor@10imaging.com
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
@@ -27,10 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV CAFFE_ROOT=/opt/caffe
 WORKDIR $CAFFE_ROOT
 
-# FIXME: use ARG instead of ENV once DockerHub supports this
-ENV CLONE_TAG=rc4
+# ENV CLONE_TAG should be set in Docker cloud
+ENV CLONE_TAG=master
 
-RUN git clone -b ${CLONE_TAG} --depth 1 https://github.com/BVLC/caffe.git . && \
+RUN git clone -b ${CLONE_TAG} --depth 1 https://github.com/10imaging/caffe.git . && \
     pip install --upgrade pip && \
     cd python && for req in $(cat requirements.txt) pydot; do pip install $req; done && cd .. && \
     mkdir build && cd build && \

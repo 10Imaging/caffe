@@ -211,6 +211,12 @@ find_path(PROTOBUF_INCLUDE_DIR
 )
 mark_as_advanced(PROTOBUF_INCLUDE_DIR)
 
+if(NOT COMMAND find_host_program)
+  macro(find_host_program)
+    find_program(${ARGN})
+  endmacro()
+endif()
+
 # Find the protoc Executable
 find_host_program(PROTOBUF_PROTOC_EXECUTABLE
     NAMES protoc

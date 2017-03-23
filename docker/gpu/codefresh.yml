@@ -1,0 +1,14 @@
+version: '1.0'
+steps:
+  BuildingDockerImage:
+    title: Building Docker Image
+    type: build
+    image_name: 10imaging/caffe-gpu
+    working_directory: ./
+    dockerfile: docker/gpu/Dockerfile
+  PushingToDockerRegistry:
+    title: Pushing to Docker Registry
+    type: push
+    candidate: '${{BuildingDockerImage}}'
+    tag: 'gpu'
+

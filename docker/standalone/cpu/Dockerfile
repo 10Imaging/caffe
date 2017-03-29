@@ -29,7 +29,7 @@ WORKDIR $CAFFE_ROOT
 # ENV CLONE_TAG should be set in Docker cloud
 ENV CLONE_TAG=master
 
-RUN git clone -b ${CLONE_TAG} --depth 1 https://github.com/BVLC/caffe.git . && \
+RUN git clone -b ${CLONE_TAG} --depth 1 https://github.com/10imaging/caffe.git . && \
     for req in $(cat python/requirements.txt) pydot; do pip install $req; done && \
     mkdir build && cd build && \
     cmake -DCPU_ONLY=1 .. && \

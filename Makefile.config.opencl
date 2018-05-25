@@ -154,11 +154,11 @@ LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib
 
 # Uncomment to use `pkg-config` to specify OpenCV library paths.
 # (Usually not necessary -- OpenCV libraries are normally installed in one of the above $LIBRARY_DIRS.)
-# USE_PKG_CONFIG := 1
+USE_PKG_CONFIG := 1
 
 # N.B. both build and distribute dirs are cleared on `make clean`
-BUILD_DIR := build
-DISTRIBUTE_DIR := distribute
+BUILD_DIR := build-opencl
+DISTRIBUTE_DIR := distribute-opencl
 
 # Uncomment for debugging. Does not work on OSX due to https://github.com/BVLC/caffe/issues/171
 # DEBUG := 1

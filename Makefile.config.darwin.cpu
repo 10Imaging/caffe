@@ -91,7 +91,7 @@ LIBRARY_DIRS += $(shell brew --prefix)/lib
 
 # Uncomment to use `pkg-config` to specify OpenCV library paths.
 # (Usually not necessary -- OpenCV libraries are normally installed in one of the above $LIBRARY_DIRS.)
-# USE_PKG_CONFIG := 1
+USE_PKG_CONFIG := 1
 
 BUILD_DIR := build-cpu
 DISTRIBUTE_DIR := distribute-darwin-cpu

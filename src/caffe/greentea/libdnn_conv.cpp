@@ -12,6 +12,10 @@
 namespace caffe {
 
 template<typename Dtype>
+LibDNNConv<Dtype>::LibDNNConv() {
+}
+
+template<typename Dtype>
 LibDNNConv<Dtype>::LibDNNConv(LibDNNConvConfig config) {
   config_ = config;
   LibDNN<Dtype>::dev_ptr_ = config.dev_ptr;
@@ -1841,7 +1845,8 @@ void LibDNNConv<Dtype>::Backward(bool prop_down_data, bool prop_down_weights,
     }
 
     // Backprop w.r.t. weights and bias
-    if (this->weights_backward_ || this->bias_backward_) {
+    if (prop_down_weights &&
+        (this->weights_backward_ || this->bias_backward_)) {
       CUfunction kernel;
       cuModuleGetFunction(&kernel, LibDNN<Dtype>::cuda_module_, "conv_weights");
 

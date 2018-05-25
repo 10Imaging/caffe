@@ -5,21 +5,34 @@ set(Caffe_DEFINITIONS "")
 set(Caffe_COMPILE_OPTIONS "")
 
 # ---[ Boost
-find_package(Boost 1.46 REQUIRED COMPONENTS system thread filesystem)
-include_directories(SYSTEM PUBLIC ${Boost_INCLUDE_DIR})
-add_definitions(-DBOOST_ALL_NO_LIB)
+find_package(Boost 1.54 REQUIRED COMPONENTS system thread filesystem)
+list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${Boost_INCLUDE_DIRS})
+list(APPEND Caffe_DEFINITIONS PUBLIC -DBOOST_ALL_NO_LIB)
 list(APPEND Caffe_LINKER_LIBS PUBLIC ${Boost_LIBRARIES})
 
-
-if(DEFINED MSVC)
-  # We should define this only when necessary,
-  # i.e VS 2013 Update 4 or earlier.
-  add_definitions(-DBOOST_NO_CXX11_TEMPLATE_ALIASES)
+if(DEFINED MSVC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18.0.40629.0)
+  # Required for VS 2013 Update 4 or earlier.
+  list(APPEND Caffe_DEFINITIONS PUBLIC -DBOOST_NO_CXX11_TEMPLATE_ALIASES)
 endif()
-
 # ---[ Threads
 find_package(Threads REQUIRED)
 list(APPEND Caffe_LINKER_LIBS PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+
+# ---[ OpenMP
+if(USE_OPENMP)
+  # Ideally, this should be provided by the BLAS library IMPORTED target. However,
+  # nobody does this, so we need to link to OpenMP explicitly and have the maintainer
+  # to flick the switch manually as needed.
+  #
+  # Moreover, OpenMP package does not provide an IMPORTED target as well, and the
+  # suggested way of linking to OpenMP is to append to CMAKE_{C,CXX}_FLAGS.
+  # However, this naïve method will force any user of Caffe to add the same kludge
+  # into their buildsystem again, so we put these options into per-target PUBLIC
+  # compile options and link flags, so that they will be exported properly.
+  find_package(OpenMP REQUIRED)
+  list(APPEND Caffe_LINKER_LIBS PRIVATE ${OpenMP_CXX_FLAGS})
+  list(APPEND Caffe_COMPILE_OPTIONS PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
 
 # ---[ Google-glog
 include("cmake/External/glog.cmake")
@@ -56,7 +69,8 @@ list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${HDF5_INCLUDE_DIRS})
 if(USE_HDF5)
   find_package(HDF5 COMPONENTS HL REQUIRED)
   include_directories(SYSTEM ${HDF5_INCLUDE_DIRS} ${HDF5_HL_INCLUDE_DIR})
-  list(APPEND Caffe_LINKER_LIBS ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${HDF5_INCLUDE_DIRS})
+  list(APPEND Caffe_LINKER_LIBS PUBLIC ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
   add_definitions(-DUSE_HDF5)
 endif()
 
@@ -181,7 +195,7 @@ if (USE_CLBLAST)
 endif()
 
 if(USE_NCCL)
-  find_package(NCCL REQUIRED)
+  include("cmake/External/nccl.cmake")
   include_directories(SYSTEM ${NCCL_INCLUDE_DIR})
   list(APPEND Caffe_LINKER_LIBS ${NCCL_LIBRARIES})
   add_definitions(-DUSE_NCCL)
@@ -286,7 +300,7 @@ if(BUILD_python)
   if(PYTHONLIBS_FOUND AND NUMPY_FOUND AND Boost_PYTHON_FOUND)
     set(HAVE_PYTHON TRUE)
     if(Boost_USE_STATIC_LIBS AND MSVC)
-      add_definitions(-DBOOST_PYTHON_STATIC_LIB)
+      list(APPEND Caffe_DEFINITIONS PUBLIC -DBOOST_PYTHON_STATIC_LIB)
     endif()
     if(BUILD_python_layer)
       list(APPEND Caffe_DEFINITIONS PRIVATE -DWITH_PYTHON_LAYER)

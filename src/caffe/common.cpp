@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cstdio>
 #include <ctime>
+#include <mutex>
 #include <tuple>
 #include <vector>
 
@@ -29,18 +30,73 @@
 
 namespace caffe {
 
+
+size_t dtsizeof(DataType data_type) {
+  switch (data_type) {
+    case DINT8:
+    case DUINT8:
+      return 1;
+    case DFP16:
+    case DINT16:
+    case DUINT16:
+      return 2;
+    case DFP32:
+    case DINT32:
+    case DUINT32:
+      return 4;
+    case DFP64:
+    case DINT64:
+    case DUINT64:
+      return 8;
+    default:
+      return 1;
+  }
+}
+
+template<> DataType dtypeof<float>() {
+  return DFP32;
+}
+template<> DataType dtypeof<double>() {
+  return DFP64;
+}
+template<> DataType dtypeof<int8_t>() {
+  return DINT8;
+}
+template<> DataType dtypeof<int16_t>() {
+  return DINT16;
+}
+template<> DataType dtypeof<int32_t>() {
+  return DINT32;
+}
+template<> DataType dtypeof<int64_t>() {
+  return DINT64;
+}
+template<> DataType dtypeof<uint8_t>() {
+  return DUINT8;
+}
+template<> DataType dtypeof<uint16_t>() {
+  return DUINT16;
+}
+template<> DataType dtypeof<uint32_t>() {
+  return DUINT32;
+}
+template<> DataType dtypeof<uint64_t>() {
+  return DUINT64;
+}
+
 // Make sure each thread can have different values.
 static boost::thread_specific_ptr<Caffe> thread_instance_;
 
 // Pointer to the global instance of Caffe
 static Caffe* global_instance_;
-static std::atomic<bool> first(true);
+static std::mutex instance_mutex_;
 
 // Device contexts are initialized once and shared on all threads
 std::vector< shared_ptr<device> > Caffe::devices_;
 
 Caffe& Caffe::Get() {
-  if (first.exchange(false)) {
+  instance_mutex_.lock();
+  if (global_instance_ == nullptr) {
     // The first call must be single threaded
     // and defines the global instance
     thread_instance_.reset(new Caffe());
@@ -52,6 +108,7 @@ Caffe& Caffe::Get() {
     // or change other aspects of the Caffe object
     thread_instance_.reset(new Caffe(*global_instance_));
   }
+  instance_mutex_.unlock();
   return *(thread_instance_.get());
 }
 
@@ -200,6 +257,10 @@ void Caffe::set_random_seed(const size_t seed, device* device_context) {
   Get().random_generator_.reset(new RNG(seed));
 }
 
+void Caffe::SetDevices(std::vector<int> device_ids) {
+  NO_GPU;
+}
+
 void Caffe::SetDevice(const int device_id) {
   NO_GPU;
 }
@@ -270,6 +331,9 @@ Caffe::~Caffe() {
   // Make sure all device contexts and
   // dependent memory blocks are freed properly
   if (this == global_instance_) {
+      instance_mutex_.lock();
+      global_instance_ = NULL;
+      instance_mutex_.unlock();
       devices_.clear();
   }
 #ifdef USE_CUDA
@@ -504,6 +568,20 @@ void Caffe::SetDevice(const int device_id) {
   Get().cl_fft_state_.setup();
 #endif
 }
+
+#ifdef USE_GREENTEA
+const cl_context& Caffe::GetOpenCLContext(const int id, bool list_id) {
+  viennacl::ocl::context &ctx = viennacl::ocl::get_context(
+         GetDevice(id, list_id)->id());
+  return ctx.handle().get();
+}
+
+const cl_command_queue& Caffe::GetOpenCLQueue(const int id, bool list_id) {
+  viennacl::ocl::context &ctx = viennacl::ocl::get_context(
+         GetDevice(id, list_id)->id());
+  return ctx.get_queue().handle().get();
+}
+#endif  // USE_GREENTEA
 
 // Should call explicitly for OCL + FFT
 void Caffe::TeardownDevice(const int device_id) {

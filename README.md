@@ -2,6 +2,22 @@
 
 **This is an experimental, community-maintained branch led by Fabian Tschopp (@naibaf7). It is a work-in-progress.**
 
+## Custom distributions
+
+- [Intel Caffe](https://github.com/BVLC/caffe/tree/intel) (Optimized for CPU and support for multi-node), in particular Xeon processors (HSW, BDW, Xeon Phi).
+- [OpenCL Caffe](https://github.com/BVLC/caffe/tree/opencl) e.g. for AMD or Intel devices.
+- [Windows Caffe](https://github.com/BVLC/caffe/tree/windows)
+
+## Community
+
+[![Join the chat at https://gitter.im/BVLC/caffe](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BVLC/caffe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+Caffe is a deep learning framework made with expression, speed, and modularity in mind.
+It is developed by Berkeley AI Research ([BAIR](http://bair.berkeley.edu))/The Berkeley Vision and Learning Center (BVLC) and community contributors.
+
+Caffe is released under the [BSD 2-Clause license](https://github.com/BVLC/caffe/blob/master/LICENSE).
+The BAIR/BVLC reference models are released for unrestricted use.
+
 **For error reports, please run and include the result of `./build/test/test_all.testbin --gtest_filter=*OpenCLKernelCompileTest* X` where `X` is the OpenCL device to test (i.e. `0`). This test is available after a build with `make all`, `make runtest`.**
 
 This branch of Caffe contains an OpenCL backend and additional layers for fast image segmentation.
@@ -12,79 +28,17 @@ This work is partially supported by:
 - ETH Zurich
 - Intel
 
-For a C++ frontend and models to use for image segmentation with this fork, see:
-- Frontend: https://github.com/naibaf7/caffe_neural_tool
-- Models: https://github.com/naibaf7/caffe_neural_models
+- [DIY Deep Learning for Vision with Caffe](https://docs.google.com/presentation/d/1UeKXVgRvvxg9OUdh_UiC5G71UMscNPlvArsWER41PsU/edit#slide=id.p)
+- [Tutorial Documentation](http://caffe.berkeleyvision.org/tutorial/)
+- [BAIR reference models](http://caffe.berkeleyvision.org/model_zoo.html) and the [community model zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo)
+- [Installation instructions](http://caffe.berkeleyvision.org/installation.html)
 
 ## OpenCL Backend
 
 The backend is supposed to work with all vendors. Note however there may be problems with libOpenCL.so provided by nVidia.
 It is therefore recommended to install another OpenCL implementation after installing nVidia drivers. Possibilities are:
-- Intel OpenCL, see below for details. 
+- Intel OpenCL, see https://github.com/01org/caffe/wiki/clCaffe for details. 
 - AMD APP SDK (OpenCL), recommended if you have an AMD GPU or CPU.
-
-### OpenCL for Intel platform for Linux.
-
-For 5th and 6th generation Intel Cores and Intel® Xeon® v3, or Intel® Xeon® v4 processor.
-We recommend the driver at the following link: https://software.intel.com/en-us/articles/opencl-drivers#latest_linux_driver.
-The download link is http://registrationcenter-download.intel.com/akdlm/irc_nas/9418/intel-opencl-2.0-2.0-54425.tar.gz
-For 3th generation cores and atom, we recommend Beignet: https://www.freedesktop.org/wiki/Software/Beignet/.
-
-The spatial domain convolution kernel supports all OpenCL platforms now. This convolution kernel
-applies auto-tuner mechanism to tune a best kernel for current parameters then store the
-result to the subdirectory ".spatialkernels". Thus at the first run, it will take relatively
-long time to perform the auto-tuning process. At the second run, it will get the result from the
-cache subdirectory directly.
-
-The spatial domain convolution is enabled by default for Intel Gen Graphics paltform. For
-other platforms, we need to modify net model specification as below:
-
-add entry "engine: SPATIAL" to all convolution layer specification.
-
-Take AlexNet as an example, we edit file $CAFFE_ROOT/models/bvlc_alexnet/train_val.prototxt, and add the following line to make conv1 layer to be computed using spatial convolution..
-
-<pre><code>
-     layer {
-       name: "conv1"
-       type: "Convolution"
-       bottom: "data"
-       top: "conv1"
-       param {
-         lr_mult: 1
-         decay_mult: 1
-       }
-       param {
-         lr_mult: 2
-         decay_mult: 0
-       }
-       convolution_param {
-         num_output: 96
-         kernel_size: 11
-         stride: 4
-         engine: INTEL_SPATIAL 		<-------------------------- this line!
-         weight_filler {
-           type: "gaussian"
-           std: 0.01
-         }
-         bias_filler {
-           type: "constant"
-           value: 0
-         }
-       }
-     }
-</code></pre>
-
-To enable the FFT domain convolution, you should install libfftw3, libfftw3f(for cpu) and clfft(for opencl) first.
-
-You can downloaded the fftw3 source code from https://github.com/FFTW/fftw3.git
-
-and the clFFT from https://github.com/listenlink/clFFT.git
-
-Then config the Cmake option with ```-DUSE_FFT=ON``` when using cmake build system or enable the Makefile.config.example line 36 ```USE_FFT := 1``` when using makefile build system
-
-Like the ```INTEL_SPATIAL```, modify the convolution_param to ```engine: FFT```to use fft based convolution engine.
-
-*Please use the latest git master viennacl which has the patch: https://github.com/viennacl/viennacl-dev/pull/181*
 
 ## Technical Report
 Available on arXiv:
@@ -175,13 +129,14 @@ If CUDA is not installed Caffe will default to a CPU_ONLY build. If you have CUD
 
 ### Using the Python interface
 
-The recommended Python distribution is Anaconda or Miniconda. To successfully build the python interface you need to install the following packages:
+The recommended Python distribution is Anaconda or Miniconda. To successfully build the python interface you need to add the following conda channels:
 ```
-conda install --yes numpy scipy matplotlib scikit-image pip six
+conda config --add channels conda-forge
+conda config --add channels willyd
 ```
-also you will need a protobuf python package that is compatible with pre-built dependencies. This package can be installed this way:
+and install the following packages:
 ```
-conda install --yes --channel willyd protobuf==3.1.0
+conda install --yes cmake ninja numpy scipy protobuf==3.1.0 six scikit-image pyyaml pydotplus graphviz
 ```
 If Python is installed the default is to build the python interface and python layers. If you wish to disable the python layers or the python build use the CMake options `-DBUILD_python_layer=0` and `-DBUILD_python=0` respectively. In order to use the python interface you need to either add the `C:\Projects\caffe\python` folder to your python path of copy the `C:\Projects\caffe\python\caffe` folder to your `site_packages` folder.
 
@@ -209,10 +164,6 @@ CMake can be used to build a shared library instead of the default static librar
 ### Troubleshooting
 
 Should you encounter any error please post the output of the above commands by redirecting the output to a file and open a topic on the [caffe-users list](https://groups.google.com/forum/#!forum/caffe-users) mailing list.
-
-## Previous Visual Studio based build
-
-The previous windows build based on Visual Studio project files is now deprecated. However, it is still available in the `windows` folder. Please see the [README.md](windows/README.md) in there for details.
 
 ## Known issues
 

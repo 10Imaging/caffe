@@ -43,39 +43,37 @@
 // Workaround for VS 2015 Update 3 which breaks boost python
 // See: http://stackoverflow.com/questions/38261530/unresolved-external-symbols-since-visual-studio-2015-update-3-boost-python-link
 // and https://msdn.microsoft.com/vs-knownissues/vs2015-update3
-#define BP_GET_POINTER_TEMPLATED(cls, dtype) \
+#define BP_GET_POINTER(cls) \
 namespace boost { \
 template <> \
-caffe::cls<dtype> const volatile * \
-get_pointer<class caffe::cls<dtype> const volatile >( \
-  class caffe::cls<dtype> const volatile *c) { \
+const volatile caffe::cls * \
+get_pointer(const volatile caffe::cls *c) { \
     return c; \
 } \
 }
 
-#define BP_GET_POINTER_BARE(cls) \
-namespace boost { \
-template <> \
-caffe::cls const volatile * \
-get_pointer<class caffe::cls const volatile >( \
-  class caffe::cls const volatile *c) { \
-    return c; \
-} \
+#define BP_GET_POINTER_T(cls, dtype) BP_GET_POINTER(cls<dtype>)
+
+// forward declare the NCCL class
+// in case we are not using NCCL
+namespace caffe {
+template <typename Dtype> class NCCL;
 }
 
-BP_GET_POINTER_TEMPLATED(Net, float);
-BP_GET_POINTER_TEMPLATED(Layer, float);
-BP_GET_POINTER_TEMPLATED(Solver, float);
-BP_GET_POINTER_TEMPLATED(SGDSolver, float);
-BP_GET_POINTER_TEMPLATED(NesterovSolver, float);
-BP_GET_POINTER_TEMPLATED(AdaGradSolver, float);
-BP_GET_POINTER_TEMPLATED(RMSPropSolver, float);
-BP_GET_POINTER_TEMPLATED(AdaDeltaSolver, float);
-BP_GET_POINTER_TEMPLATED(AdamSolver, float);
-
-BP_GET_POINTER_BARE(LayerParameter);
-BP_GET_POINTER_BARE(NetParameter);
-BP_GET_POINTER_BARE(NetState);
+BP_GET_POINTER_T(Net, float);
+BP_GET_POINTER_T(Layer, float);
+BP_GET_POINTER_T(Solver, float);
+BP_GET_POINTER_T(SGDSolver, float);
+BP_GET_POINTER_T(NesterovSolver, float);
+BP_GET_POINTER_T(AdaGradSolver, float);
+BP_GET_POINTER_T(RMSPropSolver, float);
+BP_GET_POINTER_T(AdaDeltaSolver, float);
+BP_GET_POINTER_T(AdamSolver, float);
+BP_GET_POINTER_T(NCCL, float);
+BP_GET_POINTER(Timer);
+BP_GET_POINTER(LayerParameter);
+BP_GET_POINTER(NetParameter);
+BP_GET_POINTER(NetState);
 
 #endif
 
@@ -100,15 +98,25 @@ void set_devices(bp::tuple args) {
 }
 
 
-void InitLog(int level) {
-  FLAGS_logtostderr = 1;
-  FLAGS_minloglevel = level;
+void InitLog() {
   ::google::InitGoogleLogging("");
+#ifndef _MSC_VER
+  // this symbol is undefined on windows
   ::google::InstallFailureSignalHandler();
+#endif  // _MSC_VER
 }
-void InitLogInfo() {
-  InitLog(google::INFO);
+
+void InitLogLevel(int level) {
+  FLAGS_minloglevel = level;
+  InitLog();
 }
+
+void InitLogLevelPipe(int level, bool std_err) {
+  FLAGS_minloglevel = level;
+  FLAGS_logtostderr = std_err;
+  InitLog();
+}
+
 void Log(const string& s) {
   LOG(INFO) << s;
 }
@@ -432,7 +440,7 @@ void Solver_add_callback(Solver<Dtype> * solver, bp::object on_start,
 }
 
 // Seems boost cannot call the base method directly
-void Solver_add_nccl(SGDSolver<Dtype>* solver
+void Solver_add_nccl(Solver<Dtype>* solver
 #ifdef USE_NCCL
   , NCCL<Dtype>* nccl
 #endif
@@ -440,6 +448,10 @@ void Solver_add_nccl(SGDSolver<Dtype>* solver
 #ifdef USE_NCCL
   solver->add_callback(nccl);
 #endif
+}
+
+void share_weights(Solver<Dtype>* solver, Net<Dtype>* net) {
+  net->ShareTrainedLayersWith(solver->net().get());
 }
 
 template<typename Dtype>
@@ -483,6 +495,35 @@ class NCCL {
 };
 #endif
 
+bool HasNCCL() {
+#ifdef USE_NCCL
+  return true;
+#else
+  return false;
+#endif
+}
+
+#ifdef USE_NCCL
+bp::object NCCL_New_Uid() {
+  std::string uid = NCCL<Dtype>::new_uid();
+#if PY_MAJOR_VERSION >= 3
+  // Convert std::string to bytes so that Python does not
+  // try to decode the string using the current locale.
+
+  // Since boost 1.53 boost.python will convert str and bytes
+  // to std::string but will convert std::string to str. Here we
+  // force a bytes object to be returned. When this object
+  // is passed back to the NCCL constructor boost.python will
+  // correctly convert the bytes to std::string automatically
+  PyObject* py_uid = PyBytes_FromString(uid.c_str());
+  return bp::object(bp::handle<>(py_uid));
+#else
+  // automatic conversion is correct for python 2.
+  return bp::object(uid);
+#endif
+}
+#endif
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolveOverloads, Solve, 0, 1);
 
 BOOST_PYTHON_MODULE(_caffe) {
@@ -495,8 +536,12 @@ BOOST_PYTHON_MODULE(_caffe) {
 
   // Caffe utility functions
   bp::def("init_log", &InitLog);
-  bp::def("init_log", &InitLogInfo);
+  bp::def("init_log", &InitLogLevel);
+  #ifndef _MSC_VER
+  bp::def("init_log", &InitLogLevelPipe);
+  #endif  // _MSC_VER
   bp::def("log", &Log);
+  bp::def("has_nccl", &HasNCCL);
   bp::def("set_mode_cpu", &set_mode_cpu);
   bp::def("set_mode_gpu", &set_mode_gpu);
   bp::def("set_random_seed", &set_random_seed);
@@ -617,7 +662,6 @@ BOOST_PYTHON_MODULE(_caffe) {
     .add_property("max_iter", &SolverParameter::max_iter)
     .add_property("display", &SolverParameter::display)
     .add_property("layer_wise_reduce", &SolverParameter::layer_wise_reduce);
-  bp::class_<LayerParameter>("LayerParameter", bp::no_init);
 
   bp::class_<Solver<Dtype>, shared_ptr<Solver<Dtype> >, boost::noncopyable>(
     "Solver", bp::no_init)
@@ -637,6 +681,7 @@ BOOST_PYTHON_MODULE(_caffe) {
     .def("step", &Solver<Dtype>::Step)
     .def("restore", &Solver<Dtype>::Restore)
     .def("snapshot", &Solver<Dtype>::Snapshot)
+    .def("share_weights", &share_weights)
     .add_property("param", bp::make_function(&Solver<Dtype>::param,
               bp::return_value_policy<bp::copy_const_reference>()));
   BP_REGISTER_SHARED_PTR_TO_PYTHON(Solver<Dtype>);
@@ -791,7 +836,7 @@ BOOST_PYTHON_MODULE(_caffe) {
     boost::noncopyable>("NCCL",
                         bp::init<shared_ptr<Solver<Dtype> >, const string&>())
 #ifdef USE_NCCL
-    .def("new_uid", &NCCL<Dtype>::new_uid).staticmethod("new_uid")
+    .def("new_uid", NCCL_New_Uid).staticmethod("new_uid")
     .def("bcast", &NCCL<Dtype>::Broadcast)
 #endif
     /* NOLINT_NEXT_LINE(whitespace/semicolon) */

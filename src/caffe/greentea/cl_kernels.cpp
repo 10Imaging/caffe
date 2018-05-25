@@ -10,13 +10,13 @@
   #define DOUBLE_SUPPORT "#define DISABLE_DOUBLE_SUPPORT\n"
 #else
   #define DOUBLE_SUPPORT "#define ENABLE_DOUBLE_SUPPORT\n"
-#endif //DISABLE_DOUBLE_SUPPORT
+#endif  // DISABLE_DOUBLE_SUPPORT
 namespace caffe {
 #ifdef USE_INDEX_64
-static std::string header = DOUBLE_SUPPORT "#ifndef __OPENCL_VERSION__\n#define __kernel\n#define __global\n#define __constant\n#define __local\n#define get_global_id(x) 0\n#define get_global_size(x) 0\n#define get_local_id(x) 0\n#define get_local_size(x) 0\n#define FLT_MAX 0\n#define FLT_MIN 0\n#define cl_khr_fp64\n#define cl_amd_fp64\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#define CLK_LOCAL_MEM_FENCE\n#define CLK_GLOBAL_MEM_FENCE\n#define Dtype float\n#define barrier(x)\n#define atomic_cmpxchg(x, y, z) x\n#define signbit(x) x\n#define int_tp long\n#define uint_tp unsigned long\n#define int_tpc long\n#define uint_tpc unsigned long\n#endif\n\n#define CONCAT(A,B) A##_##B\n#define TEMPLATE(name,type) CONCAT(name,type)\n\n#define TYPE_FLOAT 1\n#define TYPE_DOUBLE 2\n\n#if defined(cl_khr_fp64)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#elif defined(cl_amd_fp64)\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#endif\n\n#if defined(cl_khr_int64_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n#define ATOMICS_64_AVAILABLE\n#endif\n\n#if defined(cl_khr_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif\n\n#if defined(cl_khr_global_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_global_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif";  // NOLINT
+static std::string header = DOUBLE_SUPPORT "#ifndef __OPENCL_VERSION__\n#define __kernel\n#define __global\n#define __constant\n#define __local\n#define get_global_id(x) 0\n#define get_global_size(x) 0\n#define get_local_id(x) 0\n#define get_local_size(x) 0\n#define FLT_MAX 0\n#define FLT_MIN 0\n#define cl_khr_fp64\n#define cl_amd_fp64\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#define CLK_LOCAL_MEM_FENCE\n#define CLK_GLOBAL_MEM_FENCE\n#define Dtype float\n#define barrier(x)\n#define atomic_cmpxchg(x, y, z) x\n#define signbit(x) x\n#define int_tp long\n#define uint_tp unsigned long\n#define int_tpc long\n#define uint_tpc unsigned long\n#endif\n\n#define CONCAT(A,B) A##_##B\n#define TEMPLATE(name,type) CONCAT(name,type)\n\n#define TYPE_FLOAT 1\n#define TYPE_DOUBLE 2\n\n#if defined(cl_khr_fp64)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#elif defined(cl_amd_fp64)\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#endif\n\n#if defined(cl_khr_int64_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n#define ATOMICS_64_AVAILABLE\n#endif\n\n#if defined(cl_khr_int32_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif\n\n#if defined(cl_khr_global_int32_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif";  // NOLINT
 static std::string definitions_64 = DOUBLE_SUPPORT "// Types used for parameters, offset computations and so on\n#define int_tp long\n#define uint_tp unsigned long\n\n// Definitions used to cast the types above as needed\n#define int_tpc long\n#define uint_tpc unsigned long";  // NOLINT
 #else
-static std::string header = DOUBLE_SUPPORT "#ifndef __OPENCL_VERSION__\n#define __kernel\n#define __global\n#define __constant\n#define __local\n#define get_global_id(x) 0\n#define get_global_size(x) 0\n#define get_local_id(x) 0\n#define get_local_size(x) 0\n#define FLT_MAX 0\n#define FLT_MIN 0\n#define cl_khr_fp64\n#define cl_amd_fp64\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#define CLK_LOCAL_MEM_FENCE\n#define CLK_GLOBAL_MEM_FENCE\n#define Dtype float\n#define barrier(x)\n#define atomic_cmpxchg(x, y, z) x\n#define signbit(x) x\n#define int_tp long\n#define uint_tp unsigned long\n#define int_tpc long\n#define uint_tpc unsigned long\n#endif\n\n#define CONCAT(A,B) A##_##B\n#define TEMPLATE(name,type) CONCAT(name,type)\n\n#define TYPE_FLOAT 1\n#define TYPE_DOUBLE 2\n\n#if defined(cl_khr_fp64)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#elif defined(cl_amd_fp64)\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#endif\n\n#if defined(cl_khr_int64_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n#define ATOMICS_64_AVAILABLE\n#endif\n\n#if defined(cl_khr_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif\n\n#if defined(cl_khr_global_int32_base_atomics)\n#pragma OPENCL_EXTENSION cl_khr_global_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif";  // NOLINT
+static std::string header = DOUBLE_SUPPORT "#ifndef __OPENCL_VERSION__\n#define __kernel\n#define __global\n#define __constant\n#define __local\n#define get_global_id(x) 0\n#define get_global_size(x) 0\n#define get_local_id(x) 0\n#define get_local_size(x) 0\n#define FLT_MAX 0\n#define FLT_MIN 0\n#define cl_khr_fp64\n#define cl_amd_fp64\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#define CLK_LOCAL_MEM_FENCE\n#define CLK_GLOBAL_MEM_FENCE\n#define Dtype float\n#define barrier(x)\n#define atomic_cmpxchg(x, y, z) x\n#define signbit(x) x\n#define int_tp long\n#define uint_tp unsigned long\n#define int_tpc long\n#define uint_tpc unsigned long\n#endif\n\n#define CONCAT(A,B) A##_##B\n#define TEMPLATE(name,type) CONCAT(name,type)\n\n#define TYPE_FLOAT 1\n#define TYPE_DOUBLE 2\n\n#if defined(cl_khr_fp64)\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#elif defined(cl_amd_fp64)\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n#ifndef DISABLE_DOUBLE_SUPPORT\n#define DOUBLE_SUPPORT_AVAILABLE\n#endif //DISABLE_DOUBLE_SUPPORT\n#endif\n\n#if defined(cl_khr_int64_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n#define ATOMICS_64_AVAILABLE\n#endif\n\n#if defined(cl_khr_int32_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif\n\n#if defined(cl_khr_global_int32_base_atomics)\n#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable\n#define ATOMICS_32_AVAILABLE\n#endif";  // NOLINT
 static std::string definitions_32 = DOUBLE_SUPPORT "// Types used for parameters, offset computations and so on\n#define int_tp int\n#define uint_tp unsigned int\n\n// Definitions used to cast the types above as needed\n#define int_tpc int\n#define uint_tpc unsigned int";  // NOLINT
 #endif
 static std::vector<std::vector<std::string>> cl_kernels{
@@ -110,7 +110,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "for (int_tp index = get_global_id(0); index < n; index += get_global_size(0)) {",    // NOLINT
 "int_tp c = (index / dim) % channels / div_factor;",    // NOLINT
 "out_diff[index] = in_diff[index]",    // NOLINT
-"* ((in_data[index] > 0?1.0:0.0) + (in_data[index] <= 0?1.0:0.0) * slope_data[c]);",    // NOLINT
+"* ((Dtype)(in_data[index] > 0?1.0:0.0) + (Dtype)(in_data[index] <= 0?1.0:0.0) * slope_data[c]);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "",    // NOLINT
@@ -190,7 +190,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "Dtype v = variance[idx_chans];",    // NOLINT
 "",    // NOLINT
 "m = -scale * m;",    // NOLINT
-"v = native_powr((Dtype)mad(scale, v, eps), (Dtype)-0.5);",    // NOLINT
+"v = (Dtype)native_powr((float)mad(scale, v, eps), (float)-0.5);",    // NOLINT
 "",    // NOLINT
 "const int_tp out_off = (idx_num * channels + idx_chans) * spatial_dim + idx_spatial_dim;",    // NOLINT
 "top[out_off] = v * (top[out_off] + m);",    // NOLINT
@@ -210,7 +210,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "Dtype v = variance[idx_chans];",    // NOLINT
 "",    // NOLINT
 "m = -scale * m;",    // NOLINT
-"v = native_powr((Dtype)mad(scale, v, eps), (Dtype)-0.5);",    // NOLINT
+"v = (Dtype)native_powr((float)mad(scale, v, eps), (float)-0.5);",    // NOLINT
 "",    // NOLINT
 "const int_tp out_off = (idx_num * channels + idx_chans) * spatial_dim + idx_spatial_dim;",    // NOLINT
 "top[out_off] = v * (bottom[out_off] + m);",    // NOLINT
@@ -503,6 +503,8 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "Dtype out = arg;",    // NOLINT
 "}",    // NOLINT
 "",    // NOLINT
+"#define ACTIVATION_FUNCTION(_dst_, _offset_, _data_) do { (_dst_)[(_offset_)] = (_data_);} while(0)",    // NOLINT
+"",    // NOLINT
 "#define __CAT(x, y) x##y",    // NOLINT
 "#define CAT(x, y) __CAT(x, y)",    // NOLINT
 "#define LOOP0(VAR, STMT)",    // NOLINT
@@ -525,7 +527,8 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "#define LOOP(N, VAR, STMT) CAT(LOOP, N)((VAR), (STMT))",    // NOLINT
 "",    // NOLINT
 "#ifdef MULTI",    // NOLINT
-"__kernel void CFMulti(__global Dtype* image_data,",    // NOLINT
+"__kernel void CFMultiNoPadding(",    // NOLINT
+"__global Dtype* image_data,",    // NOLINT
 "int_tp image_offset,",    // NOLINT
 "__global Dtype* kernel_data, int_tp kernel_offset,",    // NOLINT
 "__global Dtype* bias,const int_tp bias_offset,",    // NOLINT
@@ -533,7 +536,9 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "const ushort input_width,",    // NOLINT
 "const ushort input_height,",    // NOLINT
 "const ushort output_width,",    // NOLINT
-"const ushort output_height) {",    // NOLINT
+"const ushort output_height,",    // NOLINT
+"const ushort pad_w,",    // NOLINT
+"const ushort pad_h) {",    // NOLINT
 "",    // NOLINT
 "const int_tp outputX = get_global_id(0);",    // NOLINT
 "const int_tp outputY = get_global_id(1);",    // NOLINT
@@ -541,20 +546,17 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "if(outputX < output_width && outputY < output_height)",    // NOLINT
 "{",    // NOLINT
 "Dtype sum[ZPAR];",    // NOLINT
-"Dtype4 vectorSum[ZPAR];",    // NOLINT
 "for(int_tp kern =0; kern < ZPAR; kern++)",    // NOLINT
 "{",    // NOLINT
 "sum[kern] = 0.0f;",    // NOLINT
-"vectorSum[kern] = (0.0f,0.0f,0.0f,0.0f);",    // NOLINT
 "}",    // NOLINT
 "",    // NOLINT
+"const int_tp org_y = outputY * STRIDE_H - pad_h;",    // NOLINT
+"const int_tp org_x = outputX * STRIDE_W - pad_w;",    // NOLINT
 "const int_tp currentKernelOffset = kernel_offset + kernelNum*KERNEL_H*KERNEL_W*CHANNELS;",    // NOLINT
 "const int_tp biasIndex=bias_offset + kernelNum;",    // NOLINT
-"const int_tp local_image_offset = outputY*STRIDE_H*input_width + outputX*STRIDE_W;",    // NOLINT
+"const int_tp local_image_offset = org_y*input_width + org_x;",    // NOLINT
 "const int_tp imageSize = input_width*input_height;",    // NOLINT
-"const int_tp float4Reads = KERNEL_W / 4;",    // NOLINT
-"const int_tp floatReads = KERNEL_W % 4;",    // NOLINT
-"Dtype4 imageCache;",    // NOLINT
 "",    // NOLINT
 "__global Dtype* image_dataPtrFloat = (image_data + (image_offset + local_image_offset));",    // NOLINT
 "__global Dtype* kernel_dataPtrFloat = (kernel_data + (currentKernelOffset));",    // NOLINT
@@ -563,57 +565,47 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "{",    // NOLINT
 "for(int_tp y = 0; y < KERNEL_H; y++)",    // NOLINT
 "{",    // NOLINT
-"",    // NOLINT
-"for(int_tp x=0; x< float4Reads; x++)",    // NOLINT
+"for(int_tp x = 0; x < KERNEL_W; x++)",    // NOLINT
 "{",    // NOLINT
-"imageCache = ((__global Dtype4*)image_dataPtrFloat)[x];",    // NOLINT
+"if(!(org_y + y * DILATION_Y >= 0 && org_y + y * DILATION_Y < input_height && org_x + x * DILATION_X >= 0 && org_x + x * DILATION_X < input_width))",    // NOLINT
+"{",    // NOLINT
+"continue;",    // NOLINT
+"}",    // NOLINT
 "for(int_tp kern =0; kern < ZPAR; kern++)",    // NOLINT
 "{",    // NOLINT
-"vectorSum[kern] += imageCache*((__global Dtype4*)&(kernel_dataPtrFloat[kern*KERNEL_H*KERNEL_W*CHANNELS]))[x];",    // NOLINT
+"sum[kern] += image_dataPtrFloat[x * DILATION_X] * kernel_dataPtrFloat[kern*KERNEL_H*KERNEL_W*CHANNELS + x];",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
-"",    // NOLINT
-"if(floatReads == 1)",    // NOLINT
-"{",    // NOLINT
-"imageCache = ((__global Dtype4*)image_dataPtrFloat)[float4Reads];",    // NOLINT
-"for(int_tp kern =0; kern < ZPAR; kern++)",    // NOLINT
-"vectorSum[kern].s0 += ( imageCache * ( (__global Dtype4*) &(kernel_dataPtrFloat[kern*KERNEL_H*KERNEL_W*CHANNELS]) )[float4Reads] ).s0;",    // NOLINT
-"}",    // NOLINT
-"else if(floatReads == 2)",    // NOLINT
-"{",    // NOLINT
-"imageCache = ((__global Dtype4*)image_dataPtrFloat)[float4Reads];",    // NOLINT
-"for(int_tp kern =0; kern < ZPAR; kern++)",    // NOLINT
-"vectorSum[kern].s01 += (imageCache*((__global Dtype4*)&(kernel_dataPtrFloat[kern*KERNEL_H*KERNEL_W*CHANNELS]))[float4Reads]).s01;",    // NOLINT
-"}",    // NOLINT
-"else if(floatReads == 3)",    // NOLINT
-"{",    // NOLINT
-"imageCache = ((__global Dtype4*)image_dataPtrFloat)[float4Reads];",    // NOLINT
-"for(int_tp kern =0; kern < ZPAR; kern++)",    // NOLINT
-"vectorSum[kern].s012 += (imageCache*((__global Dtype4*)&(kernel_dataPtrFloat[kern*KERNEL_H*KERNEL_W*CHANNELS]))[float4Reads]).s012;",    // NOLINT
-"}",    // NOLINT
-"",    // NOLINT
-"image_dataPtrFloat += input_width;",    // NOLINT
+"image_dataPtrFloat += input_width * DILATION_Y;",    // NOLINT
 "kernel_dataPtrFloat += KERNEL_W;",    // NOLINT
 "}",    // NOLINT
-"image_dataPtrFloat += imageSize - input_width*KERNEL_H;",    // NOLINT
+"image_dataPtrFloat += imageSize - input_width*KERNEL_H*DILATION_Y;",    // NOLINT
 "}",    // NOLINT
-"for(int_tp kern =0; kern < ZPAR; kern++)",    // NOLINT
-"sum[kern] = vectorSum[kern].x + vectorSum[kern].y + vectorSum[kern].z + vectorSum[kern].w;",    // NOLINT
 "",    // NOLINT
 "if(APPLY_BIAS == 1)",    // NOLINT
 "{",    // NOLINT
 "for(int_tp kern = 0; kern < ZPAR; kern++)",    // NOLINT
+"{",    // NOLINT
 "if(kernelNum+kern < OUTPUT_Z)",    // NOLINT
-"convolved_image[convolved_image_offset + (kernelNum+kern)*output_height*output_width + outputY*output_width + outputX] =",    // NOLINT
-"sum[kern] + bias[biasIndex +kern];",    // NOLINT
+"{",    // NOLINT
+"int_tp offset = convolved_image_offset + (kernelNum+kern)*output_height*output_width + outputY*output_width + outputX;",    // NOLINT
+"ACTIVATION_FUNCTION(convolved_image, offset, sum[kern] + bias[biasIndex +kern]);",    // NOLINT
+"}",    // NOLINT
+"}",    // NOLINT
 "}",    // NOLINT
 "else",    // NOLINT
+"{",    // NOLINT
 "for(int_tp kern = 0; kern < ZPAR; kern++)",    // NOLINT
+"{",    // NOLINT
 "if(kernelNum+kern < OUTPUT_Z)",    // NOLINT
-"convolved_image[convolved_image_offset + (kernelNum+kern)*output_height*output_width + outputY*output_width + outputX] = sum[kern];",    // NOLINT
+"{",    // NOLINT
+"int_tp offset = convolved_image_offset + (kernelNum+kern)*output_height*output_width + outputY*output_width + outputX;",    // NOLINT
+"ACTIVATION_FUNCTION(convolved_image, offset, sum[kern]);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
-"",    // NOLINT
+"}",    // NOLINT
+"}",    // NOLINT
+"}",    // NOLINT
 "#endif",    // NOLINT
 "",    // NOLINT
 "",    // NOLINT
@@ -753,7 +745,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "{",    // NOLINT
 "for(int_tp br=0; br < OUT_BLOCK_HEIGHT; br++) {",    // NOLINT
 "for(int_tp bc=0; bc < OUT_BLOCK_WIDTH; bc++) {",    // NOLINT
-"float input = BLOCK_IN((br * STRIDEY + kr) * TILE_X + bc * STRIDEX + kc);",    // NOLINT
+"float input = BLOCK_IN((br * STRIDEY + kr * DILATION_Y) * TILE_X + bc * STRIDEX + kc * DILATION_X);",    // NOLINT
 "out[br * OUT_BLOCK_WIDTH + bc] = mad(weight_buf.w[w_idx % WEIGHT_PREF], input, out[br * OUT_BLOCK_WIDTH + bc]);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
@@ -799,45 +791,16 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "",    // NOLINT
 "uint_tp out_addr = OUT_BUFF_OFFSET + ( num_in_batch * TOTAL_OUTPUT_DEPTH + fm ) * output_width * output_height;",    // NOLINT
 "out_addr += or * output_width + oc;",    // NOLINT
-"float bias = biases[(fm % ALIGNED_NUM_FILTERS)];",    // NOLINT
+"float bias = biases[fm];",    // NOLINT
 "",    // NOLINT
-"#ifndef WRITE_PADDED_VALUES",    // NOLINT
-"if(get_global_id(0) != (get_global_size(0)-1) &&",    // NOLINT
-"get_global_id(1) != (get_global_size(1)-1) )",    // NOLINT
-"{",    // NOLINT
-"#endif",    // NOLINT
 "for(uint_tp r = 0; r < OUT_BLOCK_HEIGHT; r++) {",    // NOLINT
+"if (r + or >= output_height) break;",    // NOLINT
 "for(uint_tp c = 0; c < OUT_BLOCK_WIDTH; c++) {",    // NOLINT
+"if (c + oc >= output_width) break;",    // NOLINT
 "// this does a scattered write to SIMD_SIZE different feature maps, so that data within one map is contiguous, thus ready for input to next layer.",    // NOLINT
 "outputs[out_addr + r * output_width + c] = activation_function(bias + out[r * OUT_BLOCK_WIDTH + c]);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
-"#ifndef WRITE_PADDED_VALUES",    // NOLINT
-"} else if ( get_global_id(1) != (get_global_size(1)-1) )",    // NOLINT
-"{",    // NOLINT
-"for(uint_tp r = 0; r < OUT_BLOCK_HEIGHT; r++) {",    // NOLINT
-"for(uint_tp c = 0; c < LAST_BLOCK_WIDTH; c++) {",    // NOLINT
-"outputs[out_addr + r * output_width + c] = activation_function(bias + out[r * OUT_BLOCK_WIDTH + c]);",    // NOLINT
-"}",    // NOLINT
-"}",    // NOLINT
-"}",    // NOLINT
-"else if ( get_global_id(0) != (get_global_size(0)-1) )",    // NOLINT
-"{",    // NOLINT
-"for(uint_tp r = 0; r < LAST_BLOCK_HEIGHT; r++) {",    // NOLINT
-"for(uint_tp c = 0; c < OUT_BLOCK_WIDTH; c++) {",    // NOLINT
-"outputs[out_addr + r * output_width + c] = activation_function(bias + out[r * OUT_BLOCK_WIDTH + c]);",    // NOLINT
-"}",    // NOLINT
-"}",    // NOLINT
-"}",    // NOLINT
-"else",    // NOLINT
-"{",    // NOLINT
-"for(uint_tp r = 0; r < LAST_BLOCK_HEIGHT; r++) {",    // NOLINT
-"for(uint_tp c = 0; c < LAST_BLOCK_WIDTH; c++) {",    // NOLINT
-"outputs[out_addr + r * output_width + c] = activation_function(bias + out[r * OUT_BLOCK_WIDTH + c]);",    // NOLINT
-"}",    // NOLINT
-"}",    // NOLINT
-"}",    // NOLINT
-"#endif //#ifndef WRITE_PADDED_VALUES",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "#endif",    // NOLINT
@@ -882,6 +845,16 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "typedef struct float15 { float s0; float s1; float s2; float s3; float s4; float s5;",    // NOLINT
 "float s6; float s7; float s8; float s9; float sa; float sb; float sc; float sd; float se; } float15;",    // NOLINT
 "typedef struct float0 { float s0; } float0; //never used but makes compiler happy.",    // NOLINT
+"",    // NOLINT
+"#define OUT_PITCH_X output_width",    // NOLINT
+"#define ROW_PITCH input_width",    // NOLINT
+"",    // NOLINT
+"#ifdef FUSED_CONV_ELTWISE",    // NOLINT
+"#define GEMM_LIKE_KERNEL_ARGS         __global Dtype* eltwise_data,     const __global Dtype *src0,       const __global Dtype *src1,       const __global Dtype *biases,     __global Dtype *dst,              const ushort input_width,         const ushort input_height,        const ushort output_width,        const ushort output_height,       const int_tp out_pitch_y,         const int_tp out_pitch_z,         const int_tp aligned_input_size,     const int_tp slice_pitch",    // NOLINT
+"#else",    // NOLINT
+"#define GEMM_LIKE_KERNEL_ARGS         const __global Dtype *src0,       const __global Dtype *src1,       const __global Dtype *biases,     __global Dtype *dst,              const ushort input_width,         const ushort input_height,        const ushort output_width,        const ushort output_height,       const int_tp out_pitch_y,         const int_tp out_pitch_z,         const int_tp aligned_input_size,     const int_tp slice_pitch",    // NOLINT
+"#endif",    // NOLINT
+"",    // NOLINT
 "#endif",    // NOLINT
 "",    // NOLINT
 "",    // NOLINT
@@ -902,12 +875,10 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "#define TILE_K          KERNEL_WIDTH",    // NOLINT
 "#define TILE_N          32",    // NOLINT
 "",    // NOLINT
+"#ifdef __BEIGNET__",    // NOLINT
 "__attribute__((intel_reqd_sub_group_size(8)))",    // NOLINT
-"__kernel void Conv_Interleaved(",    // NOLINT
-"const __global float *src0,",    // NOLINT
-"const __global float *src1,",    // NOLINT
-"const __global float *biases,",    // NOLINT
-"__global float *dst)",    // NOLINT
+"#endif",    // NOLINT
+"__kernel void Conv_Interleaved(GEMM_LIKE_KERNEL_ARGS)",    // NOLINT
 "{",    // NOLINT
 "const int group_x = get_group_id(0);",    // NOLINT
 "const int group_y = get_group_id(1);",    // NOLINT
@@ -935,13 +906,13 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Src0 (patch input) is directly used as atile.",    // NOLINT
 "// Each work item points to the start of a different patch.",    // NOLINT
 "// atile is M rows x K columns.",    // NOLINT
-"int curr_x = ( global_y % OUT_WIDTH ) * STRIDE_X;",    // NOLINT
-"int curr_y = ( global_y / OUT_WIDTH ) * STRIDE_Y;",    // NOLINT
-"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0",    // NOLINT
+"int curr_x = ( global_y % output_width ) * STRIDE_X;",    // NOLINT
+"int curr_y = ( global_y / output_width ) * STRIDE_Y;",    // NOLINT
+"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "int saved_y = curr_y;",    // NOLINT
 "#endif",    // NOLINT
 "const __global float *src0_read = src0",    // NOLINT
-"+ ALIGNED_INPUT_SIZE * global_z                            // batch offset",    // NOLINT
+"+ aligned_input_size * global_z                            // batch offset",    // NOLINT
 "+ (curr_y - INPUT_PAD_H) * ROW_PITCH      // y offset",    // NOLINT
 "+ (curr_x - INPUT_PAD_W);                 // x offset",    // NOLINT
 "",    // NOLINT
@@ -957,7 +928,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "do",    // NOLINT
 "{",    // NOLINT
 "int patch_row = 0;",    // NOLINT
-"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0",    // NOLINT
+"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "curr_y = saved_y;",    // NOLINT
 "#endif",    // NOLINT
 "",    // NOLINT
@@ -975,7 +946,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// ...",    // NOLINT
 "const bool kernel_width_is_odd = KERNEL_WIDTH % 2 == 1;",    // NOLINT
 "",    // NOLINT
-"#if INPUT_PAD_W == 0 && INPUT_PAD_H == 0",    // NOLINT
+"#if INPUT_PAD_W == 0 && INPUT_PAD_H == 0 && DILATION_X == 1 && DILATION_Y == 1",    // NOLINT
 "float_t blockA00 = ( (const __global float_t*)src0_read )[  0  ];",    // NOLINT
 "float*  pblockA00 = (float*)(&blockA00);",    // NOLINT
 "#else",    // NOLINT
@@ -984,14 +955,14 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "int pos = 0;",    // NOLINT
 "LOOP(KERNEL_WIDTH, pos,",    // NOLINT
 "{",    // NOLINT
-"if (curr_y >= INPUT_PAD_H && curr_y < INPUT_HEIGHT + INPUT_PAD_H && curr_x + pos >= INPUT_PAD_W && curr_x + pos < INPUT_WIDTH + INPUT_PAD_W)",    // NOLINT
-"pblockA00[pos] = src0_read[pos];",    // NOLINT
+"if (curr_y >= INPUT_PAD_H && curr_y < input_height + INPUT_PAD_H && curr_x + pos * DILATION_X >= INPUT_PAD_W && curr_x + pos * DILATION_X < input_width + INPUT_PAD_W)",    // NOLINT
+"pblockA00[pos] = src0_read[pos * DILATION_X];",    // NOLINT
 "else",    // NOLINT
 "pblockA00[pos] = 0;",    // NOLINT
 "})",    // NOLINT
-"curr_y++;",    // NOLINT
+"curr_y += DILATION_Y;",    // NOLINT
 "#endif",    // NOLINT
-"src0_read += ROW_PITCH;",    // NOLINT
+"src0_read += (ROW_PITCH * DILATION_Y);",    // NOLINT
 "",    // NOLINT
 "float blockB00[KERNEL_WIDTH*4];",    // NOLINT
 "float8* p8BlockB00 = (float8*)blockB00;",    // NOLINT
@@ -1038,7 +1009,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "//while( ++patch_row < 1 ); //debug",    // NOLINT
 "while( ++patch_row < KERNEL_HEIGHT );",    // NOLINT
 "",    // NOLINT
-"src0_read += SLICE_PITCH - ( KERNEL_HEIGHT * ROW_PITCH ); // reset to start of next slice of patch",    // NOLINT
+"src0_read += slice_pitch - ( KERNEL_HEIGHT * ROW_PITCH * DILATION_Y); // reset to start of next slice of patch",    // NOLINT
 "}",    // NOLINT
 "//while ( ++patch_depth < 1 ); //debug",    // NOLINT
 "while ( ++patch_depth < INPUT_DEPTH );",    // NOLINT
@@ -1046,23 +1017,24 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Dst resembles a cube of width x height x (output channel * batches).  Each tile writes:",    // NOLINT
 "// (SIMD * TILE_M) x 1 x TILE_N.  Partial writes most likely generated if padding used.",    // NOLINT
 "__global float *out = dst",    // NOLINT
-"+ global_z * OUT_PITCH_Z                                                   // batch offset",    // NOLINT
-"+ ( group_x * TILE_N ) * OUT_PITCH_Y                                       // channel offset",    // NOLINT
-"+ ( ( global_y * TILE_M ) / OUT_WIDTH + OUT_PADDING_HEIGHT) * OUT_PITCH_X  // y offset",    // NOLINT
-"+ ( ( global_y * TILE_M ) % OUT_WIDTH ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"+ global_z * out_pitch_z                                                   // batch offset",    // NOLINT
+"+ ( group_x * TILE_N ) * out_pitch_y                                       // channel offset",    // NOLINT
+"+ ( ( global_y * TILE_M ) / output_width + OUT_PADDING_HEIGHT) * OUT_PITCH_X  // y offset",    // NOLINT
+"+ ( ( global_y * TILE_M ) % output_width ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"",    // NOLINT
 "float bias[4];",    // NOLINT
 "float4 *bias_vec;",    // NOLINT
 "bias_vec = (float4*)bias;",    // NOLINT
 "*bias_vec = as_float4(intel_sub_group_block_read4((__global uint *)biases + group_x * TILE_N));",    // NOLINT
 "",    // NOLINT
-"if (global_y * TILE_M < OUT_WIDTH * OUT_HEIGHT )",    // NOLINT
+"if (global_y * TILE_M < output_width * output_height )",    // NOLINT
 "{",    // NOLINT
 "for (int i = 0; i < 8; i++)",    // NOLINT
 "{",    // NOLINT
-"out[( 0+i) * OUT_PITCH_Y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
-"out[( 8+i) * OUT_PITCH_Y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
-"out[(16+i) * OUT_PITCH_Y] = blockC20[i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
-"out[(24+i) * OUT_PITCH_Y] = blockC30[i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
+"out[( 0+i) * out_pitch_y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
+"out[( 8+i) * out_pitch_y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
+"out[(16+i) * out_pitch_y] = blockC20[i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
+"out[(24+i) * out_pitch_y] = blockC30[i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
@@ -1082,13 +1054,13 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Src0 (patch input) is directly used as atile.",    // NOLINT
 "// Each work item points to the start of a different patch.",    // NOLINT
 "// atile is M rows x K columns.",    // NOLINT
-"int curr_x = ( global_y % OUT_WIDTH ) * STRIDE_X;",    // NOLINT
-"int curr_y = ( global_y / OUT_WIDTH ) * STRIDE_Y;",    // NOLINT
-"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0",    // NOLINT
+"int curr_x = ( global_y % output_width ) * STRIDE_X;",    // NOLINT
+"int curr_y = ( global_y / output_width ) * STRIDE_Y;",    // NOLINT
+"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "int saved_y = curr_y;",    // NOLINT
 "#endif",    // NOLINT
 "const __global float *src0_read = src0",    // NOLINT
-"+ ALIGNED_INPUT_SIZE * global_z                            // batch offset",    // NOLINT
+"+ aligned_input_size * global_z                            // batch offset",    // NOLINT
 "+ (curr_y - INPUT_PAD_H) * ROW_PITCH      // y offset",    // NOLINT
 "+ (curr_x - INPUT_PAD_W);                 // x offset",    // NOLINT
 "",    // NOLINT
@@ -1104,14 +1076,14 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "do",    // NOLINT
 "{",    // NOLINT
 "int patch_row = 0;",    // NOLINT
-"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0",    // NOLINT
+"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "curr_y = saved_y;",    // NOLINT
 "#endif",    // NOLINT
 "do",    // NOLINT
 "{",    // NOLINT
 "// Load atile and interleaved btile.",    // NOLINT
 "const bool kernel_width_is_odd = KERNEL_WIDTH % 2 == 1;",    // NOLINT
-"#if INPUT_PAD_W == 0 && INPUT_PAD_H == 0",    // NOLINT
+"#if INPUT_PAD_W == 0 && INPUT_PAD_H == 0 && DILATION_X == 1 && DILATION_Y == 1",    // NOLINT
 "float_t blockA00 = ( (const __global float_t*)src0_read )[  0  ];",    // NOLINT
 "float*  pblockA00 = (float*)(&blockA00);",    // NOLINT
 "#else",    // NOLINT
@@ -1120,14 +1092,14 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "int pos = 0;",    // NOLINT
 "LOOP(KERNEL_WIDTH, pos,",    // NOLINT
 "{",    // NOLINT
-"if (curr_y >= INPUT_PAD_H && curr_y < INPUT_HEIGHT + INPUT_PAD_H && curr_x + pos >= INPUT_PAD_W && curr_x + pos < INPUT_WIDTH + INPUT_PAD_W)",    // NOLINT
-"pblockA00[pos] = src0_read[pos];",    // NOLINT
+"if (curr_y >= INPUT_PAD_H && curr_y < input_height + INPUT_PAD_H && curr_x + pos * DILATION_X >= INPUT_PAD_W && curr_x + pos * DILATION_X < input_width + INPUT_PAD_W)",    // NOLINT
+"pblockA00[pos] = src0_read[pos * DILATION_X];",    // NOLINT
 "else",    // NOLINT
 "pblockA00[pos] = 0;",    // NOLINT
 "})",    // NOLINT
-"curr_y++;",    // NOLINT
+"curr_y += DILATION_Y;",    // NOLINT
 "#endif",    // NOLINT
-"src0_read += ROW_PITCH;",    // NOLINT
+"src0_read += (ROW_PITCH * DILATION_Y);",    // NOLINT
 "float blockB[KERNEL_WIDTH * TILE_N_LAST_DIV8];",    // NOLINT
 "",    // NOLINT
 "interleaved_y = 0;",    // NOLINT
@@ -1197,7 +1169,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "//while( ++patch_row < 1 ); //debug",    // NOLINT
 "while( ++patch_row < KERNEL_HEIGHT );",    // NOLINT
 "",    // NOLINT
-"src0_read += SLICE_PITCH - ( KERNEL_HEIGHT * ROW_PITCH ); // reset to start of next slice of patch",    // NOLINT
+"src0_read += slice_pitch - ( KERNEL_HEIGHT * ROW_PITCH * DILATION_Y ); // reset to start of next slice of patch",    // NOLINT
 "}",    // NOLINT
 "//while ( ++patch_depth < 1 );  //debug",    // NOLINT
 "while ( ++patch_depth < INPUT_DEPTH );",    // NOLINT
@@ -1205,23 +1177,24 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Dst resembles a cube of width x height x (output channel * batches).  Each tile writes:",    // NOLINT
 "// (SIMD * TILE_M) x 1 x TILE_N.  Partial writes most likely generated if padding used.",    // NOLINT
 "__global float *out = dst",    // NOLINT
-"+ global_z * OUT_PITCH_Z                                                   // batch offset",    // NOLINT
-"+ ( group_x * TILE_N ) * OUT_PITCH_Y                                       // channel offset",    // NOLINT
-"+ ( ( global_y * TILE_M ) / OUT_WIDTH + OUT_PADDING_HEIGHT) * OUT_PITCH_X  // y offset",    // NOLINT
-"+ ( ( global_y * TILE_M ) % OUT_WIDTH ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"+ global_z * out_pitch_z                                                   // batch offset",    // NOLINT
+"+ ( group_x * TILE_N ) * out_pitch_y                                       // channel offset",    // NOLINT
+"+ ( ( global_y * TILE_M ) / output_width + OUT_PADDING_HEIGHT) * OUT_PITCH_X  // y offset",    // NOLINT
+"+ ( ( global_y * TILE_M ) % output_width ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"",    // NOLINT
 "float bias[4];",    // NOLINT
 "float4 *bias_vec;",    // NOLINT
 "bias_vec = (float4*)bias;",    // NOLINT
 "*bias_vec = as_float4(intel_sub_group_block_read4((__global uint *)biases + group_x * TILE_N));",    // NOLINT
 "",    // NOLINT
-"if (global_y * TILE_M < OUT_WIDTH * OUT_HEIGHT )",    // NOLINT
+"if (global_y * TILE_M < output_width * output_height )",    // NOLINT
 "{",    // NOLINT
 "for (int i = 0; i < 8; i++)",    // NOLINT
 "{",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 0 ) out[( 0+i) * OUT_PITCH_Y] = blockC[0][i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 1 ) out[( 8+i) * OUT_PITCH_Y] = blockC[1][i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 2 ) out[(16+i) * OUT_PITCH_Y] = blockC[2][i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 3 ) out[(24+i) * OUT_PITCH_Y] = blockC[3][i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 0 ) out[( 0+i) * out_pitch_y] = blockC[0][i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 1 ) out[( 8+i) * out_pitch_y] = blockC[1][i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 2 ) out[(16+i) * out_pitch_y] = blockC[2][i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 3 ) out[(24+i) * out_pitch_y] = blockC[3][i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
@@ -1237,11 +1210,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "#ifndef __BEIGNET__",    // NOLINT
 "__attribute__((intel_reqd_sub_group_size(16)))",    // NOLINT
 "#endif",    // NOLINT
-"__kernel void Conv_Interleaved(",    // NOLINT
-"const __global Dtype *src0,",    // NOLINT
-"const __global Dtype *src1,",    // NOLINT
-"const __global Dtype *biases,",    // NOLINT
-"__global Dtype *dst)",    // NOLINT
+"__kernel void Conv_Interleaved(GEMM_LIKE_KERNEL_ARGS)",    // NOLINT
 "{",    // NOLINT
 "const int group_x = get_group_id(0);",    // NOLINT
 "const int group_y = get_group_id(1);",    // NOLINT
@@ -1260,14 +1229,14 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Src0 (patch input) is directly used as atile.",    // NOLINT
 "// Each work item points to the start of a different patch.",    // NOLINT
 "// atile is M rows x K columns.",    // NOLINT
-"int curr_x = ( global_y % OUT_WIDTH ) * STRIDE_X;",    // NOLINT
-"int curr_y = ( global_y / OUT_WIDTH ) * STRIDE_Y;",    // NOLINT
-"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0",    // NOLINT
+"int curr_x = ( global_y % output_width ) * STRIDE_X;",    // NOLINT
+"int curr_y = ( global_y / output_width ) * STRIDE_Y;",    // NOLINT
+"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "int saved_y = curr_y;",    // NOLINT
 "#endif",    // NOLINT
 "",    // NOLINT
 "const __global Dtype *src0_read = src0",    // NOLINT
-"+ ALIGNED_INPUT_SIZE * global_z                            // batch offset",    // NOLINT
+"+ aligned_input_size * global_z                            // batch offset",    // NOLINT
 "+ (curr_y - INPUT_PAD_H) * ROW_PITCH      // y offset",    // NOLINT
 "+ curr_x - INPUT_PAD_W;                 // x offset",    // NOLINT
 "const __global Dtype *src0_read_orig = src0_read;",    // NOLINT
@@ -1283,14 +1252,18 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Inner loop loads and FMADs one row (KERNEL_WIDTH) of each input patch",    // NOLINT
 "// and KERNEL_WIDTH/2 rows of interleaved filter.",    // NOLINT
 "int patch_depth = 0;",    // NOLINT
+"#ifndef __BEIGNET__",    // NOLINT
 "__attribute__((opencl_unroll_hint(1)))",    // NOLINT
+"#endif",    // NOLINT
 "do",    // NOLINT
 "{",    // NOLINT
 "int patch_row = 0;",    // NOLINT
 "#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0",    // NOLINT
 "curr_y = saved_y;",    // NOLINT
 "#endif",    // NOLINT
+"#ifndef __BEIGNET__",    // NOLINT
 "__attribute__((opencl_unroll_hint(1)))",    // NOLINT
+"#endif",    // NOLINT
 "do",    // NOLINT
 "{",    // NOLINT
 "// Load atile and btile.",    // NOLINT
@@ -1305,7 +1278,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// ...",    // NOLINT
 "const bool kernel_width_is_odd = KERNEL_WIDTH % 2 == 1;",    // NOLINT
 "",    // NOLINT
-"#if INPUT_PAD_W == 0 && INPUT_PAD_H == 0",    // NOLINT
+"#if INPUT_PAD_W == 0 && INPUT_PAD_H == 0 && DILATION_X == 1 && DILATION_Y == 1",    // NOLINT
 "Dtype_t blockA00 = ( (const __global Dtype_t*)src0_read )[  0  ];",    // NOLINT
 "Dtype*  pblockA00 = (Dtype*)(&blockA00);",    // NOLINT
 "#else",    // NOLINT
@@ -1314,14 +1287,14 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "int pos = 0;",    // NOLINT
 "LOOP(KERNEL_WIDTH, pos,",    // NOLINT
 "{",    // NOLINT
-"if (curr_y >= INPUT_PAD_H && curr_y < INPUT_HEIGHT + INPUT_PAD_H && curr_x + pos >= INPUT_PAD_W && curr_x + pos < INPUT_WIDTH + INPUT_PAD_W)",    // NOLINT
-"pblockA00[pos] = src0_read[pos];",    // NOLINT
+"if (curr_y >= INPUT_PAD_H && curr_y < input_height + INPUT_PAD_H && curr_x + pos * DILATION_X >= INPUT_PAD_W && curr_x + pos * DILATION_X < input_width + INPUT_PAD_W)",    // NOLINT
+"pblockA00[pos] = src0_read[pos * DILATION_X];",    // NOLINT
 "else",    // NOLINT
 "pblockA00[pos] = 0;",    // NOLINT
 "})",    // NOLINT
-"curr_y++;",    // NOLINT
+"curr_y += DILATION_Y;",    // NOLINT
 "#endif",    // NOLINT
-"src0_read += ROW_PITCH;",    // NOLINT
+"src0_read += ROW_PITCH * DILATION_X;",    // NOLINT
 "uint blockB00[KERNEL_WIDTH * 2];",    // NOLINT
 "uint4* p4BlockB00 = (uint4*)blockB00;",    // NOLINT
 "uint2* p2BlockB00 = (uint2*)blockB00;",    // NOLINT
@@ -1361,7 +1334,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "//while( ++patch_row < 1 ); //debug",    // NOLINT
 "while( ++patch_row < KERNEL_HEIGHT );",    // NOLINT
 "",    // NOLINT
-"src0_read += SLICE_PITCH - ( KERNEL_HEIGHT * ROW_PITCH ); // reset to start of next slice of patch",    // NOLINT
+"src0_read += slice_pitch - ( KERNEL_HEIGHT * ROW_PITCH * DILATION_Y ); // reset to start of next slice of patch",    // NOLINT
 "}",    // NOLINT
 "//while ( ++patch_depth < 1 );  //debug",    // NOLINT
 "while ( ++patch_depth < INPUT_DEPTH );",    // NOLINT
@@ -1369,10 +1342,10 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Dst resembles a cube of width x height x (output channel * batches).  Each tile writes:",    // NOLINT
 "// (SIMD * TILE_M) x 1 x TILE_N.  Partial writes most likely generated if padding used.",    // NOLINT
 "__global Dtype *out = dst",    // NOLINT
-"+ global_z * OUT_PITCH_Z                                                   // batch offset",    // NOLINT
-"+ ( group_x * TILE_N ) * OUT_PITCH_Y                                       // channel offset",    // NOLINT
-"+ ( ( global_y * TILE_M ) / OUT_WIDTH + OUT_PADDING_HEIGHT) * OUT_PITCH_X  // y offset",    // NOLINT
-"+ ( ( global_y * TILE_M ) % OUT_WIDTH ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"+ global_z * out_pitch_z                                                   // batch offset",    // NOLINT
+"+ ( group_x * TILE_N ) * out_pitch_y                                       // channel offset",    // NOLINT
+"+ ( ( global_y * TILE_M ) / output_width + OUT_PADDING_HEIGHT) * OUT_PITCH_X  // y offset",    // NOLINT
+"+ ( ( global_y * TILE_M ) % output_width ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
 "",    // NOLINT
 "Dtype bias[2];",    // NOLINT
 "Dtype2 *bias_vec;",    // NOLINT
@@ -1382,28 +1355,28 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "if (group_x > 0xFFFFFFFEul)",    // NOLINT
 "out[0] = bias[0] + bias[1];",    // NOLINT
 "",    // NOLINT
-"if (global_y * TILE_M < OUT_WIDTH * OUT_HEIGHT )",    // NOLINT
+"if (global_y * TILE_M < output_width * output_height )",    // NOLINT
 "{",    // NOLINT
 "#if ( ( OUT_DEPTH % TILE_N ) == 0 )",    // NOLINT
 "for (int i = 0; i < 16; i++)",    // NOLINT
 "{",    // NOLINT
-"out[( 0+i) * OUT_PITCH_Y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
-"out[(16+i) * OUT_PITCH_Y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);;",    // NOLINT
+"out[( 0+i) * out_pitch_y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
+"out[(16+i) * out_pitch_y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);;",    // NOLINT
 "}",    // NOLINT
 "#elif ( ( OUT_DEPTH % 16 ) == 0 )",    // NOLINT
 "if ( ( global_x + 1 ) < get_global_size(0) )",    // NOLINT
 "{",    // NOLINT
 "for ( int i = 0; i < 16; i++ )",    // NOLINT
 "{",    // NOLINT
-"out[( 0+i) * OUT_PITCH_Y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
-"out[(16+i) * OUT_PITCH_Y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);;",    // NOLINT
+"out[( 0+i) * out_pitch_y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
+"out[(16+i) * out_pitch_y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);;",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "else",    // NOLINT
 "{",    // NOLINT
 "for (int i = 0; i < 16; i++)",    // NOLINT
 "{",    // NOLINT
-"out[( 0+i) * OUT_PITCH_Y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
+"out[( 0+i) * out_pitch_y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "#else",    // NOLINT
@@ -1411,8 +1384,8 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "{",    // NOLINT
 "for ( int i = 0; i < 16; i++ )",    // NOLINT
 "{",    // NOLINT
-"out[( 0+i) * OUT_PITCH_Y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
-"out[(16+i) * OUT_PITCH_Y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);;",    // NOLINT
+"out[( 0+i) * out_pitch_y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
+"out[(16+i) * out_pitch_y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);;",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "else",    // NOLINT
@@ -1421,18 +1394,18 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "{",    // NOLINT
 "for (int i = 0; i < 16 ; i++)",    // NOLINT
 "{",    // NOLINT
-"out[( 0+i) * OUT_PITCH_Y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
+"out[( 0+i) * out_pitch_y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
 "}",    // NOLINT
 "for (int i = 0; i < OUT_DEPTH % 16 ; i++)",    // NOLINT
 "{",    // NOLINT
-"out[(16+i) * OUT_PITCH_Y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);;",    // NOLINT
+"out[(16+i) * out_pitch_y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);;",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "#else",    // NOLINT
 "{",    // NOLINT
 "for (int i = 0; i < OUT_DEPTH % 16 ; i++)",    // NOLINT
 "{",    // NOLINT
-"out[( 0+i) * OUT_PITCH_Y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
+"out[( 0+i) * out_pitch_y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);;",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "#endif",    // NOLINT
@@ -1459,12 +1432,10 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "#define TILE_K          KERNEL_WIDTH",    // NOLINT
 "#define TILE_N          32",    // NOLINT
 "",    // NOLINT
+"#ifdef __BEIGNET__",    // NOLINT
 "__attribute__((intel_reqd_sub_group_size(8)))",    // NOLINT
-"__kernel void Conv_Interleaved(",    // NOLINT
-"const __global float *src0,",    // NOLINT
-"const __global float *src1,",    // NOLINT
-"const __global float *biases,",    // NOLINT
-"__global float *dst)",    // NOLINT
+"#endif",    // NOLINT
+"__kernel void Conv_Interleaved(GEMM_LIKE_KERNEL_ARGS)",    // NOLINT
 "{",    // NOLINT
 "const int group_x = get_group_id(0);",    // NOLINT
 "const int group_y = get_group_id(1);",    // NOLINT
@@ -1496,20 +1467,20 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Src0 (patch input) is directly used as atile.",    // NOLINT
 "// Each work item points to the start of a different patch.",    // NOLINT
 "// atile is M rows x K columns.",    // NOLINT
-"int curr_x0 = ( ( global_y * TILE_M + 0 ) % OUT_WIDTH ) * STRIDE_X;",    // NOLINT
-"int curr_x1 = ( ( global_y * TILE_M + 1 ) % OUT_WIDTH ) * STRIDE_X;",    // NOLINT
-"int curr_y0 = ( ( global_y * TILE_M + 0 ) / OUT_WIDTH ) * STRIDE_Y;",    // NOLINT
-"int curr_y1 = ( ( global_y * TILE_M + 1 ) / OUT_WIDTH ) * STRIDE_Y;",    // NOLINT
-"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0",    // NOLINT
+"int curr_x0 = ( ( global_y * TILE_M + 0 ) % output_width ) * STRIDE_X;",    // NOLINT
+"int curr_x1 = ( ( global_y * TILE_M + 1 ) % output_width ) * STRIDE_X;",    // NOLINT
+"int curr_y0 = ( ( global_y * TILE_M + 0 ) / output_width ) * STRIDE_Y;",    // NOLINT
+"int curr_y1 = ( ( global_y * TILE_M + 1 ) / output_width ) * STRIDE_Y;",    // NOLINT
+"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "int saved_y0 = curr_y0;",    // NOLINT
 "int saved_y1 = curr_y1;",    // NOLINT
 "#endif",    // NOLINT
 "const __global float *src0_read0 = src0",    // NOLINT
-"+ ALIGNED_INPUT_SIZE * global_z                                            // batch offset",    // NOLINT
+"+ aligned_input_size * global_z                                            // batch offset",    // NOLINT
 "+ (curr_y0 - INPUT_PAD_H) * ROW_PITCH   // y offset",    // NOLINT
 "+ curr_x0 - INPUT_PAD_W;                // x offset",    // NOLINT
 "const __global float *src0_read1 = src0",    // NOLINT
-"+ ALIGNED_INPUT_SIZE * global_z                                            // batch offset",    // NOLINT
+"+ aligned_input_size * global_z                                            // batch offset",    // NOLINT
 "+ (curr_y1 - INPUT_PAD_H) * ROW_PITCH   // y offset",    // NOLINT
 "+ curr_x1 - INPUT_PAD_W;                // x offset",    // NOLINT
 "",    // NOLINT
@@ -1538,7 +1509,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// (0, 2) (8, 2) (16, 2) (24, 2) ...       ...",    // NOLINT
 "// ...",    // NOLINT
 "const bool kernel_width_is_odd = KERNEL_WIDTH % 2 == 1;",    // NOLINT
-"#if INPUT_PAD_H == 0 && INPUT_PAD_W == 0",    // NOLINT
+"#if INPUT_PAD_H == 0 && INPUT_PAD_W == 0 && DILATION_X == 1 && DILATION_Y == 1",    // NOLINT
 "float_t blockA00 = ( (const __global float_t*)src0_read0 )[  0  ]; src0_read0 += ROW_PITCH;",    // NOLINT
 "float_t blockA01 = ( (const __global float_t*)src0_read1 )[  0  ]; src0_read1 += ROW_PITCH;",    // NOLINT
 "float*  pblockA00 = (float*)(&blockA00);",    // NOLINT
@@ -1549,25 +1520,25 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "int pos = 0;",    // NOLINT
 "LOOP(KERNEL_WIDTH, pos,",    // NOLINT
 "{",    // NOLINT
-"if (curr_y0 >= INPUT_PAD_H && curr_y0 < INPUT_HEIGHT + INPUT_PAD_H && curr_x0 + pos >= INPUT_PAD_W && curr_x0 + pos< INPUT_WIDTH + INPUT_PAD_W)",    // NOLINT
-"pblockA00[pos] = src0_read0[pos];",    // NOLINT
+"if (curr_y0 >= INPUT_PAD_H && curr_y0 < input_height + INPUT_PAD_H && curr_x0 + pos * DILATION_X >= INPUT_PAD_W && curr_x0 + pos * DILATION_X < input_width + INPUT_PAD_W)",    // NOLINT
+"pblockA00[pos] = src0_read0[pos * DILATION_X];",    // NOLINT
 "else",    // NOLINT
 "pblockA00[pos] = 0;",    // NOLINT
 "})",    // NOLINT
-"curr_y0++;",    // NOLINT
+"curr_y0 += DILATION_Y;",    // NOLINT
 "float_t blockA01;",    // NOLINT
 "float*  pblockA01 = (float*)(&blockA01);",    // NOLINT
 "pos = 0;",    // NOLINT
 "LOOP(KERNEL_WIDTH, pos,",    // NOLINT
 "{",    // NOLINT
-"if (curr_y1 >= INPUT_PAD_H && curr_y1 < INPUT_HEIGHT + INPUT_PAD_H && curr_x1 + pos >= INPUT_PAD_W && curr_x1 + pos < INPUT_WIDTH + INPUT_PAD_W)",    // NOLINT
-"pblockA01[pos] = src0_read1[pos];",    // NOLINT
+"if (curr_y1 >= INPUT_PAD_H && curr_y1 < input_height + INPUT_PAD_H && curr_x1 + pos * DILATION_X >= INPUT_PAD_W && curr_x1 + pos * DILATION_X < input_width + INPUT_PAD_W)",    // NOLINT
+"pblockA01[pos] = src0_read1[pos * DILATION_X];",    // NOLINT
 "else",    // NOLINT
 "pblockA01[pos] = 0;",    // NOLINT
 "})",    // NOLINT
-"curr_y1++;",    // NOLINT
-"src0_read0 += ROW_PITCH;",    // NOLINT
-"src0_read1 += ROW_PITCH;",    // NOLINT
+"curr_y1 += DILATION_Y;",    // NOLINT
+"src0_read0 += ROW_PITCH * DILATION_Y;",    // NOLINT
+"src0_read1 += ROW_PITCH * DILATION_Y;",    // NOLINT
 "#endif",    // NOLINT
 "float blockB00[KERNEL_WIDTH*4];",    // NOLINT
 "float8* p8BlockB00 = (float8*)blockB00;",    // NOLINT
@@ -1625,12 +1596,12 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "",    // NOLINT
 "//while( ++patch_row < 1 ); //debug",    // NOLINT
 "while( ++patch_row < KERNEL_HEIGHT );",    // NOLINT
-"#if INPUT_PAD_W != 0 || INPUT_PAD_H != 0",    // NOLINT
+"#if INPUT_PAD_W != 0 || INPUT_PAD_H != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "curr_y0 = saved_y0;",    // NOLINT
 "curr_y1 = saved_y1;",    // NOLINT
 "#endif",    // NOLINT
-"src0_read0 += SLICE_PITCH - ( KERNEL_HEIGHT * ROW_PITCH ); // reset to start of next slice of patch",    // NOLINT
-"src0_read1 += SLICE_PITCH - ( KERNEL_HEIGHT * ROW_PITCH );",    // NOLINT
+"src0_read0 += slice_pitch - ( KERNEL_HEIGHT * ROW_PITCH * DILATION_Y ); // reset to start of next slice of patch",    // NOLINT
+"src0_read1 += slice_pitch - ( KERNEL_HEIGHT * ROW_PITCH * DILATION_Y );",    // NOLINT
 "}",    // NOLINT
 "//while ( ++patch_depth < 1 );  //debug",    // NOLINT
 "while ( ++patch_depth < INPUT_DEPTH );",    // NOLINT
@@ -1638,39 +1609,39 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Dst resembles a cube of width x height x (output channel * batches).  Each tile writes:",    // NOLINT
 "// (SIMD * TILE_M) x 1 x TILE_N.  Partial writes most likely generated if padding used.",    // NOLINT
 "__global float *out0 = dst",    // NOLINT
-"+ global_z * OUT_PITCH_Z                                                       // batch offset",    // NOLINT
-"+ ( group_x * TILE_N ) * OUT_PITCH_Y                                           // channel offset",    // NOLINT
-"+ ( ( global_y * TILE_M + 0 ) / OUT_WIDTH + OUT_PADDING_HEIGHT ) * OUT_PITCH_X // y offset",    // NOLINT
-"+ ( ( global_y * TILE_M + 0 ) % OUT_WIDTH ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"+ global_z * out_pitch_z                                                       // batch offset",    // NOLINT
+"+ ( group_x * TILE_N ) * out_pitch_y                                           // channel offset",    // NOLINT
+"+ ( ( global_y * TILE_M + 0 ) / output_width + OUT_PADDING_HEIGHT ) * OUT_PITCH_X // y offset",    // NOLINT
+"+ ( ( global_y * TILE_M + 0 ) % output_width ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
 "__global float *out1 = dst",    // NOLINT
-"+ global_z * OUT_PITCH_Z                                                       // batch offset",    // NOLINT
-"+ ( group_x * TILE_N ) * OUT_PITCH_Y                                           // channel offset",    // NOLINT
-"+ ( ( global_y * TILE_M + 1 ) / OUT_WIDTH + OUT_PADDING_HEIGHT ) * OUT_PITCH_X // y offset",    // NOLINT
-"+ ( ( global_y * TILE_M + 1 ) % OUT_WIDTH ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"+ global_z * out_pitch_z                                                       // batch offset",    // NOLINT
+"+ ( group_x * TILE_N ) * out_pitch_y                                           // channel offset",    // NOLINT
+"+ ( ( global_y * TILE_M + 1 ) / output_width + OUT_PADDING_HEIGHT ) * OUT_PITCH_X // y offset",    // NOLINT
+"+ ( ( global_y * TILE_M + 1 ) % output_width ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
 "",    // NOLINT
 "float bias[4];",    // NOLINT
 "float4 *bias_vec;",    // NOLINT
 "bias_vec = (float4*)bias;",    // NOLINT
 "*bias_vec = as_float4(intel_sub_group_block_read4((__global uint *)biases + group_x * TILE_N));",    // NOLINT
 "",    // NOLINT
-"if( global_y * TILE_M < OUT_WIDTH * OUT_HEIGHT )",    // NOLINT
+"if( global_y * TILE_M < output_width * output_height )",    // NOLINT
 "{",    // NOLINT
 "for( int i = 0; i < 8; i++ )",    // NOLINT
 "{",    // NOLINT
-"out0[( 0+i) * OUT_PITCH_Y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
-"out0[( 8+i) * OUT_PITCH_Y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
-"out0[(16+i) * OUT_PITCH_Y] = blockC20[i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
-"out0[(24+i) * OUT_PITCH_Y] = blockC30[i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
+"out0[( 0+i) * out_pitch_y] = blockC00[i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
+"out0[( 8+i) * out_pitch_y] = blockC10[i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
+"out0[(16+i) * out_pitch_y] = blockC20[i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
+"out0[(24+i) * out_pitch_y] = blockC30[i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
-"if( global_y * TILE_M + 1 < OUT_WIDTH * OUT_HEIGHT )",    // NOLINT
+"if( global_y * TILE_M + 1 < output_width * output_height )",    // NOLINT
 "{",    // NOLINT
 "for( int i = 0; i < 8; i++ )",    // NOLINT
 "{",    // NOLINT
-"out1[( 0+i) * OUT_PITCH_Y] = blockC01[i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
-"out1[( 8+i) * OUT_PITCH_Y] = blockC11[i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
-"out1[(16+i) * OUT_PITCH_Y] = blockC21[i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
-"out1[(24+i) * OUT_PITCH_Y] = blockC31[i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
+"out1[( 0+i) * out_pitch_y] = blockC01[i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
+"out1[( 8+i) * out_pitch_y] = blockC11[i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
+"out1[(16+i) * out_pitch_y] = blockC21[i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
+"out1[(24+i) * out_pitch_y] = blockC31[i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
@@ -1692,20 +1663,20 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Src0 (patch input) is directly used as atile.",    // NOLINT
 "// Each work item points to the start of a different patch.",    // NOLINT
 "// atile is M rows x K columns.",    // NOLINT
-"int curr_x0 = ( ( global_y * TILE_M + 0 ) % OUT_WIDTH ) * STRIDE_X;",    // NOLINT
-"int curr_x1 = ( ( global_y * TILE_M + 1 ) % OUT_WIDTH ) * STRIDE_X;",    // NOLINT
-"int curr_y0 = ( ( global_y * TILE_M + 0 ) / OUT_WIDTH ) * STRIDE_Y;",    // NOLINT
-"int curr_y1 = ( ( global_y * TILE_M + 1 ) / OUT_WIDTH ) * STRIDE_Y;",    // NOLINT
-"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0",    // NOLINT
+"int curr_x0 = ( ( global_y * TILE_M + 0 ) % output_width ) * STRIDE_X;",    // NOLINT
+"int curr_x1 = ( ( global_y * TILE_M + 1 ) % output_width ) * STRIDE_X;",    // NOLINT
+"int curr_y0 = ( ( global_y * TILE_M + 0 ) / output_width ) * STRIDE_Y;",    // NOLINT
+"int curr_y1 = ( ( global_y * TILE_M + 1 ) / output_width ) * STRIDE_Y;",    // NOLINT
+"#if INPUT_PAD_H != 0 || INPUT_PAD_W != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "int saved_y0 = curr_y0;",    // NOLINT
 "int saved_y1 = curr_y1;",    // NOLINT
 "#endif",    // NOLINT
 "const __global float *src0_read0 = src0",    // NOLINT
-"+ ALIGNED_INPUT_SIZE * global_z                                            // batch offset",    // NOLINT
+"+ aligned_input_size * global_z                                            // batch offset",    // NOLINT
 "+ (curr_y0 - INPUT_PAD_H) * ROW_PITCH   // y offset",    // NOLINT
 "+ curr_x0 - INPUT_PAD_W;                // x offset",    // NOLINT
 "const __global float *src0_read1 = src0",    // NOLINT
-"+ ALIGNED_INPUT_SIZE * global_z                                            // batch offset",    // NOLINT
+"+ aligned_input_size * global_z                                            // batch offset",    // NOLINT
 "+ (curr_y1 - INPUT_PAD_H) * ROW_PITCH   // y offset",    // NOLINT
 "+ curr_x1 - INPUT_PAD_W;                // x offset",    // NOLINT
 "",    // NOLINT
@@ -1725,7 +1696,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "{",    // NOLINT
 "// Load atile and interleaved btile.",    // NOLINT
 "const bool kernel_width_is_odd = KERNEL_WIDTH % 2 == 1;",    // NOLINT
-"#if INPUT_PAD_H == 0 && INPUT_PAD_W == 0",    // NOLINT
+"#if INPUT_PAD_H == 0 && INPUT_PAD_W == 0 && DILATION_X == 1 && DILATION_Y == 1",    // NOLINT
 "float_t blockA00 = ( (const __global float_t*)src0_read0 )[  0  ]; src0_read0 += ROW_PITCH;",    // NOLINT
 "float_t blockA01 = ( (const __global float_t*)src0_read1 )[  0  ]; src0_read1 += ROW_PITCH;",    // NOLINT
 "float*  pblockA00 = (float*)(&blockA00);",    // NOLINT
@@ -1736,25 +1707,25 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "int pos = 0;",    // NOLINT
 "LOOP(KERNEL_WIDTH, pos,",    // NOLINT
 "{",    // NOLINT
-"if (curr_y0 >= INPUT_PAD_H && curr_y0 < INPUT_HEIGHT + INPUT_PAD_H && curr_x0 + pos >= INPUT_PAD_W && curr_x0 + pos< INPUT_WIDTH + INPUT_PAD_W)",    // NOLINT
-"pblockA00[pos] = src0_read0[pos];",    // NOLINT
+"if (curr_y0 >= INPUT_PAD_H && curr_y0 < input_height + INPUT_PAD_H && curr_x0 + pos * DILATION_X >= INPUT_PAD_W && curr_x0 + pos * DILATION_X < input_width + INPUT_PAD_W)",    // NOLINT
+"pblockA00[pos] = src0_read0[pos * DILATION_X];",    // NOLINT
 "else",    // NOLINT
 "pblockA00[pos] = 0;",    // NOLINT
 "})",    // NOLINT
-"curr_y0++;",    // NOLINT
+"curr_y0 += DILATION_Y;",    // NOLINT
 "float_t blockA01;",    // NOLINT
 "float*  pblockA01 = (float*)(&blockA01);",    // NOLINT
 "pos = 0;",    // NOLINT
 "LOOP(KERNEL_WIDTH, pos,",    // NOLINT
 "{",    // NOLINT
-"if (curr_y1 >= INPUT_PAD_H && curr_y1 < INPUT_HEIGHT + INPUT_PAD_H && curr_x1 + pos >= INPUT_PAD_W && curr_x1 + pos < INPUT_WIDTH + INPUT_PAD_W)",    // NOLINT
-"pblockA01[pos] = src0_read1[pos];",    // NOLINT
+"if (curr_y1 >= INPUT_PAD_H && curr_y1 < input_height + INPUT_PAD_H && curr_x1 + pos * DILATION_X >= INPUT_PAD_W && curr_x1 + pos * DILATION_X < input_width + INPUT_PAD_W)",    // NOLINT
+"pblockA01[pos] = src0_read1[pos * DILATION_X];",    // NOLINT
 "else",    // NOLINT
 "pblockA01[pos] = 0;",    // NOLINT
 "})",    // NOLINT
-"curr_y1++;",    // NOLINT
-"src0_read0 += ROW_PITCH;",    // NOLINT
-"src0_read1 += ROW_PITCH;",    // NOLINT
+"curr_y1 += DILATION_Y;",    // NOLINT
+"src0_read0 += (ROW_PITCH * DILATION_Y);",    // NOLINT
+"src0_read1 += (ROW_PITCH * DILATION_Y);",    // NOLINT
 "#endif",    // NOLINT
 "float blockB[KERNEL_WIDTH * TILE_N_LAST_DIV8];",    // NOLINT
 "",    // NOLINT
@@ -1833,12 +1804,12 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "",    // NOLINT
 "//while( ++patch_row < 1 ); //debug",    // NOLINT
 "while( ++patch_row < KERNEL_HEIGHT );",    // NOLINT
-"#if INPUT_PAD_W != 0 || INPUT_PAD_H != 0",    // NOLINT
+"#if INPUT_PAD_W != 0 || INPUT_PAD_H != 0 || DILATION_X != 1 || DILATION_Y != 1",    // NOLINT
 "curr_y0 = saved_y0;",    // NOLINT
 "curr_y1 = saved_y1;",    // NOLINT
 "#endif",    // NOLINT
-"src0_read0 += SLICE_PITCH - ( KERNEL_HEIGHT * ROW_PITCH ); // reset to start of next slice of patch",    // NOLINT
-"src0_read1 += SLICE_PITCH - ( KERNEL_HEIGHT * ROW_PITCH );",    // NOLINT
+"src0_read0 += slice_pitch - ( KERNEL_HEIGHT * ROW_PITCH * DILATION_Y ); // reset to start of next slice of patch",    // NOLINT
+"src0_read1 += slice_pitch - ( KERNEL_HEIGHT * ROW_PITCH * DILATION_Y );",    // NOLINT
 "}",    // NOLINT
 "//while ( ++patch_depth < 1 );  //debug",    // NOLINT
 "while ( ++patch_depth < INPUT_DEPTH );",    // NOLINT
@@ -1846,38 +1817,38 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "// Dst resembles a cube of width x height x (output channel * batches).  Each tile writes:",    // NOLINT
 "// (SIMD * TILE_M) x 1 x TILE_N.  Partial writes most likely generated if padding used.",    // NOLINT
 "__global float *out0 = dst",    // NOLINT
-"+ global_z * OUT_PITCH_Z                                                       // batch offset",    // NOLINT
-"+ ( group_x * TILE_N ) * OUT_PITCH_Y                                           // channel offset",    // NOLINT
-"+ ( ( global_y * TILE_M + 0 ) / OUT_WIDTH + OUT_PADDING_HEIGHT ) * OUT_PITCH_X // y offset",    // NOLINT
-"+ ( ( global_y * TILE_M + 0 ) % OUT_WIDTH ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"+ global_z * out_pitch_z                                                       // batch offset",    // NOLINT
+"+ ( group_x * TILE_N ) * out_pitch_y                                           // channel offset",    // NOLINT
+"+ ( ( global_y * TILE_M + 0 ) / output_width + OUT_PADDING_HEIGHT ) * OUT_PITCH_X // y offset",    // NOLINT
+"+ ( ( global_y * TILE_M + 0 ) % output_width ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
 "__global float *out1 = dst",    // NOLINT
-"+ global_z * OUT_PITCH_Z                                                       // batch offset",    // NOLINT
-"+ ( group_x * TILE_N ) * OUT_PITCH_Y                                           // channel offset",    // NOLINT
-"+ ( ( global_y * TILE_M + 1 ) / OUT_WIDTH + OUT_PADDING_HEIGHT ) * OUT_PITCH_X // y offset",    // NOLINT
-"+ ( ( global_y * TILE_M + 1 ) % OUT_WIDTH ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
+"+ global_z * out_pitch_z                                                       // batch offset",    // NOLINT
+"+ ( group_x * TILE_N ) * out_pitch_y                                           // channel offset",    // NOLINT
+"+ ( ( global_y * TILE_M + 1 ) / output_width + OUT_PADDING_HEIGHT ) * OUT_PITCH_X // y offset",    // NOLINT
+"+ ( ( global_y * TILE_M + 1 ) % output_width ) + OUT_PADDING_LEFT;               // x offset",    // NOLINT
 "",    // NOLINT
 "float bias[4];",    // NOLINT
 "float4 *bias_vec;",    // NOLINT
 "bias_vec = (float4*)bias;",    // NOLINT
 "*bias_vec = as_float4(intel_sub_group_block_read4((__global uint *)biases + group_x * TILE_N));",    // NOLINT
-"if( global_y * TILE_M < OUT_WIDTH * OUT_HEIGHT )",    // NOLINT
+"if( global_y * TILE_M < output_width * output_height )",    // NOLINT
 "{",    // NOLINT
 "for( int i = 0; i < 8; i++ )",    // NOLINT
 "{",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 0 ) out0[( 0+i) * OUT_PITCH_Y] = blockC0[0][i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 1 ) out0[( 8+i) * OUT_PITCH_Y] = blockC0[1][i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 2 ) out0[(16+i) * OUT_PITCH_Y] = blockC0[2][i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 3 ) out0[(24+i) * OUT_PITCH_Y] = blockC0[3][i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 0 ) out0[( 0+i) * out_pitch_y] = blockC0[0][i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 1 ) out0[( 8+i) * out_pitch_y] = blockC0[1][i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 2 ) out0[(16+i) * out_pitch_y] = blockC0[2][i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 3 ) out0[(24+i) * out_pitch_y] = blockC0[3][i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
-"if( global_y * TILE_M + 1 < OUT_WIDTH * OUT_HEIGHT )",    // NOLINT
+"if( global_y * TILE_M + 1 < output_width * output_height )",    // NOLINT
 "{",    // NOLINT
 "for( int i = 0; i < 8; i++ )",    // NOLINT
 "{",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 0 ) out1[( 0+i) * OUT_PITCH_Y] = blockC1[0][i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 1 ) out1[( 8+i) * OUT_PITCH_Y] = blockC1[1][i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 2 ) out1[(16+i) * OUT_PITCH_Y] = blockC1[2][i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
-"if ( TILE_N_LAST_DIV8 > 3 ) out1[(24+i) * OUT_PITCH_Y] = blockC1[3][i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 0 ) out1[( 0+i) * out_pitch_y] = blockC1[0][i] + intel_sub_group_shuffle(bias[0], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 1 ) out1[( 8+i) * out_pitch_y] = blockC1[1][i] + intel_sub_group_shuffle(bias[1], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 2 ) out1[(16+i) * out_pitch_y] = blockC1[2][i] + intel_sub_group_shuffle(bias[2], i);",    // NOLINT
+"if ( TILE_N_LAST_DIV8 > 3 ) out1[(24+i) * out_pitch_y] = blockC1[3][i] + intel_sub_group_shuffle(bias[3], i);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
@@ -1955,22 +1926,53 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "#include \"header.cl\"",    // NOLINT
 "#endif",    // NOLINT
 "",    // NOLINT
-"__kernel void TEMPLATE(crop_copy, Dtype)(const int_tp n,",    // NOLINT
-"const int_tp height,",    // NOLINT
-"const int_tp width,",    // NOLINT
-"const int_tp src_inner_stride,",    // NOLINT
-"const int_tp dest_inner_stride,",    // NOLINT
+"inline int_tp TEMPLATE(compute_uncropped_index,Dtype)(",    // NOLINT
+"int_tp index,",    // NOLINT
+"const int_tp ndims,",    // NOLINT
+"__global const int_tp*  src_strides,",    // NOLINT
+"__global const int_tp*  dst_strides,",    // NOLINT
+"__global const int_tp*  offsets) {",    // NOLINT
+"int_tp dest_index = index;",    // NOLINT
+"int_tp src_index = 0;",    // NOLINT
+"for (int_tp i = 0; i < ndims; ++i) {",    // NOLINT
+"int_tp coord = dest_index / dst_strides[i];",    // NOLINT
+"dest_index -= coord * dst_strides[i];",    // NOLINT
+"src_index += src_strides[i] * (coord + offsets[i]);",    // NOLINT
+"}",    // NOLINT
+"return src_index;",    // NOLINT
+"}",    // NOLINT
+"",    // NOLINT
+"__kernel void TEMPLATE(crop_forward,Dtype)(const int_tp nthreads,",    // NOLINT
+"const int_tp ndims,",    // NOLINT
+"__global const int_tp*  src_strides,",    // NOLINT
+"__global const int_tp*  dst_strides,",    // NOLINT
+"__global const int_tp*  offsets,",    // NOLINT
 "__global const Dtype* src,",    // NOLINT
 "const int_tp src_off,",    // NOLINT
-"__global Dtype* dest,",    // NOLINT
-"const int_tp dest_off) {",    // NOLINT
-"for (int_tp index = get_global_id(0); index < n;",    // NOLINT
+"__global Dtype*  dst,",    // NOLINT
+"const int_tp dst_off) {",    // NOLINT
+"for (int_tp index = get_global_id(0); index < nthreads;",    // NOLINT
 "index += get_global_size(0)) {",    // NOLINT
-"int_tp src_start = index * src_inner_stride + src_off;",    // NOLINT
-"int_tp dest_start = index * dest_inner_stride + dest_off;",    // NOLINT
-"for (int_tp i = 0; i < width; ++i) {",    // NOLINT
-"dest[dest_start + i] = src[src_start + i];",    // NOLINT
+"int_tp src_index = TEMPLATE(compute_uncropped_index,Dtype)(",    // NOLINT
+"index, ndims, src_strides, dst_strides, offsets);",    // NOLINT
+"dst[dst_off + index] = src[src_off + src_index];",    // NOLINT
 "}",    // NOLINT
+"}",    // NOLINT
+"",    // NOLINT
+"__kernel void TEMPLATE(crop_backward,Dtype)(const int_tp nthreads,",    // NOLINT
+"const int_tp ndims,",    // NOLINT
+"__global const int_tp*  src_strides,",    // NOLINT
+"__global const int_tp*  dst_strides,",    // NOLINT
+"__global const int_tp*  offsets,",    // NOLINT
+"__global Dtype*  src,",    // NOLINT
+"const int_tp src_off,",    // NOLINT
+"__global const Dtype* dst,",    // NOLINT
+"const int_tp dst_off) {",    // NOLINT
+"for (int_tp index = get_global_id(0); index < nthreads;",    // NOLINT
+"index += get_global_size(0)) {",    // NOLINT
+"int_tp src_index = TEMPLATE(compute_uncropped_index,Dtype)(",    // NOLINT
+"index, ndims, src_strides, dst_strides, offsets);",    // NOLINT
+"src[src_off + src_index] = dst[dst_off + index];",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 ""},   // NOLINT
@@ -3265,14 +3267,14 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "if (d_col_start[i] >= d_col_end[i]) {",    // NOLINT
 "// Skip computation if the dimension is 0 at any spatial axis --",    // NOLINT
 "// final val will be 0.",    // NOLINT
-"data_im[index] = 0;",    // NOLINT
+"data_im[index] = (Dtype)0.0;",    // NOLINT
 "done = true;",    // NOLINT
 "break;  // for (int_tp i = 0; i < num_axes; ++i)",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "if (!done) {",    // NOLINT
 "// Loop over the col to compute the output val.",    // NOLINT
-"Dtype val = 0;",    // NOLINT
+"Dtype val = (Dtype)0.0;",    // NOLINT
 "bool incremented = true;",    // NOLINT
 "bool skip = false;",    // NOLINT
 "do {",    // NOLINT
@@ -3474,7 +3476,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "* in_off[(head - size) * step];",    // NOLINT
 "}",    // NOLINT
 "scale_val = k + accum_scale * alpha_over_size;",    // NOLINT
-"out_off[(head - post_pad) * step] = in_off[(head - post_pad) * step] * native_powr(scale_val, negative_beta);",    // NOLINT
+"out_off[(head - post_pad) * step] = in_off[(head - post_pad) * step] * (Dtype)native_powr((float)scale_val, (float)negative_beta);",    // NOLINT
 "++head;",    // NOLINT
 "}",    // NOLINT
 "// subtract only",    // NOLINT
@@ -3484,7 +3486,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "* in_off[(head - size) * step];",    // NOLINT
 "}",    // NOLINT
 "scale_val = k + accum_scale * alpha_over_size;",    // NOLINT
-"out_off[(head - post_pad) * step] = in_off[(head - post_pad) * step] * native_powr(scale_val, negative_beta);",    // NOLINT
+"out_off[(head - post_pad) * step] = in_off[(head - post_pad) * step] * (Dtype)native_powr((float)scale_val, (float)negative_beta);",    // NOLINT
 "++head;",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
@@ -3528,7 +3530,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "}",    // NOLINT
 "scale_val = k + accum_scale * alpha_over_size;",    // NOLINT
 "scale_off[(head - post_pad) * step] = scale_val;",    // NOLINT
-"out_off[(head - post_pad) * step] = in_off[(head - post_pad) * step] * native_powr(scale_val, negative_beta);",    // NOLINT
+"out_off[(head - post_pad) * step] = in_off[(head - post_pad) * step] * (Dtype)native_powr((float)scale_val, (float)negative_beta);",    // NOLINT
 "++head;",    // NOLINT
 "}",    // NOLINT
 "// subtract only",    // NOLINT
@@ -3539,7 +3541,7 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "}",    // NOLINT
 "scale_val = k + accum_scale * alpha_over_size;",    // NOLINT
 "scale_off[(head - post_pad) * step] = scale_val;",    // NOLINT
-"out_off[(head - post_pad) * step] = in_off[(head - post_pad) * step] * native_powr(scale_val, negative_beta);",    // NOLINT
+"out_off[(head - post_pad) * step] = in_off[(head - post_pad) * step] * (Dtype)native_powr((float)scale_val, (float)negative_beta);",    // NOLINT
 "++head;",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
@@ -3710,6 +3712,14 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "const int_tp offy) {",    // NOLINT
 "for (int_tp index = get_global_id(0); index < n; index += get_global_size(0)) {",    // NOLINT
 "y[offy + index] = log((Dtype)(a[offa + index]));",    // NOLINT
+"}",    // NOLINT
+"}",    // NOLINT
+"",    // NOLINT
+"__kernel void TEMPLATE(sqrt,Dtype)(const int_tp n, __global const Dtype* a,",    // NOLINT
+"const int_tp offa,",    // NOLINT
+"__global Dtype* y, const int_tp offy) {",    // NOLINT
+"for (int_tp index = get_global_id(0); index < n; index += get_global_size(0)) {",    // NOLINT
+"y[offy + index] = sqrt((Dtype)a[offa + index]);",    // NOLINT
 "}",    // NOLINT
 "}",    // NOLINT
 "",    // NOLINT
@@ -4926,7 +4936,8 @@ static std::vector<std::vector<std::string>> cl_kernels{
 "}",    // NOLINT
 "",    // NOLINT
 "// Copied from caffe.pb.h, must keep consistent with the original definition",    // NOLINT
-"#if TYPE==TYPE_FLOAT",    // NOLINT
+"#ifndef __SOFTMAX_LOSS_CL__",    // NOLINT
+"#define __SOFTMAX_LOSS_CL__",    // NOLINT
 "enum LossParameter_NormalizationMode {",    // NOLINT
 "LossParameter_NormalizationMode_FULL = 0,",    // NOLINT
 "LossParameter_NormalizationMode_VALID = 1,",    // NOLINT
@@ -5222,7 +5233,15 @@ viennacl::ocl::program & RegisterKernels(viennacl::ocl::context *ctx) {
   }
   ss << "#ifdef DOUBLE_SUPPORT_AVAILABLE" << "\n\n";  // NOLINT
   ss << "#undef Dtype" << "\n\n";  // NOLINT
+  ss << "#undef Dtype2" << "\n\n";  // NOLINT
+  ss << "#undef Dtype4" << "\n\n";  // NOLINT
+  ss << "#undef Dtype8" << "\n\n";  // NOLINT
+  ss << "#undef Dtype16" << "\n\n";  // NOLINT
   ss << "#define Dtype double" << "\n\n";  // NOLINT
+  ss << "#define Dtype2 double2" << "\n\n";  // NOLINT
+  ss << "#define Dtype4 double4" << "\n\n";  // NOLINT
+  ss << "#define Dtype8 double8" << "\n\n";  // NOLINT
+  ss << "#define Dtype16 double16" << "\n\n";  // NOLINT
   ss << "#undef TYPE" << "\n\n";  // NOLINT
   ss << "#define TYPE TYPE_DOUBLE" << "\n\n";  // NOLINT
   for (int i = 0; i < cl_kernels.size(); ++i) {
@@ -5288,10 +5307,18 @@ std::string getKernelBundleSource(int index) {
 #endif
   if (std::is_same<Dtype, float>::value) {
     ss << "#define Dtype float" << "\n\n";  // NOLINT
+    ss << "#define Dtype2 float2" << "\n\n";  // NOLINT
+    ss << "#define Dtype4 float4" << "\n\n";  // NOLINT
+    ss << "#define Dtype8 float8" << "\n\n";  // NOLINT
+    ss << "#define Dtype16 float16" << "\n\n";  // NOLINT
     ss << "#define TYPE TYPE_FLOAT" << "\n\n";  // NOLINT
   } else {
     ss << "#ifdef DOUBLE_SUPPORT_AVAILABLE" << "\n\n";  // NOLINT
     ss << "#define Dtype double" << "\n\n";  // NOLINT
+    ss << "#define Dtype2 double2" << "\n\n";  // NOLINT
+    ss << "#define Dtype4 double4" << "\n\n";  // NOLINT
+    ss << "#define Dtype8 double8" << "\n\n";  // NOLINT
+    ss << "#define Dtype16 double16" << "\n\n";  // NOLINT
     ss << "#define TYPE TYPE_DOUBLE" << "\n\n";  // NOLINT
   }
   for (int j = 0; j < cl_kernels[index].size(); ++j) {

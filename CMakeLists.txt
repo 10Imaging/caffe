@@ -18,8 +18,8 @@ endif()
 project(Caffe C CXX)
 
 # ---[ Caffe version
-set(CAFFE_TARGET_VERSION "1.0.0-rc4" CACHE STRING "Caffe logical version")
-set(CAFFE_TARGET_SOVERSION "1.0.0-rc4" CACHE STRING "Caffe soname version")
+set(CAFFE_TARGET_VERSION "1.0.0" CACHE STRING "Caffe logical version")
+set(CAFFE_TARGET_SOVERSION "1.0.0" CACHE STRING "Caffe soname version")
 add_definitions(-DCAFFE_VERSION=${CAFFE_TARGET_VERSION})
 
 # Search packages for host system instead of packages for target system
@@ -39,6 +39,7 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
 include(ExternalProject)
+include(GNUInstallDirs)
 
 include(cmake/Utils.cmake)
 include(cmake/Targets.cmake)
@@ -53,6 +54,7 @@ caffe_option(CPU_ONLY "Build Caffe without CUDA and OpenCL support" OFF)
 caffe_option(USE_INDEX_64 "Build Caffe with 64 bit indexing" OFF)
 caffe_option(USE_CUDA "Build Caffe with CUDA support" OFF)
 caffe_option(USE_GREENTEA "Build Caffe with OpenCL support" ON)
+caffe_option(DISABLE_DEVICE_HOST_UNIFIED_MEMORY "Disable host/device shared memory" OFF)
 caffe_option(USE_LIBDNN "Build Caffe with LibDNN library support" ON)
 caffe_option(USE_CLBLAS "Build Caffe with clBLAS support (instead of using ViennaClBLAS)" OFF)
 caffe_option(USE_CLBLAST "Build Caffe with CLBlast support (instead of using ViennaClBLAS)" OFF)
@@ -119,6 +121,7 @@ if(ANDROID)
   caffe_enable_cpp11_support()
 endif()
 
+
 # ---[ Dependencies
 include(cmake/Dependencies.cmake)
 
@@ -148,10 +151,6 @@ endif()
 
 if(USE_INDEX_64)
   list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_INDEX_64)
-endif()
-
-if(NOT MSVC)
-  add_definitions(-DGTEST_USE_OWN_TR1_TUPLE)
 endif()
 
 # ---[ Warnings
@@ -210,8 +209,19 @@ if(BUILD_python)
   add_dependencies(pytest pycaffe)
 endif()
 
+# ---[ uninstall target
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Uninstall.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/Uninstall.cmake
+    IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/Uninstall.cmake)
+
 # ---[ Configuration summary
 caffe_print_configuration_summary()
 
 # ---[ Export configs generation
 caffe_generate_export_configs()
+

@@ -24,10 +24,6 @@ function(caffe_generate_export_configs)
     set(HAVE_CUDA FALSE)
   endif()
 
-  # Disable autolinking on platforms that defaults to this
-  # e.g. Windows
-  list(APPEND Caffe_DEFINITIONS -DBOOST_ALL_NO_LIB)
-
   if(USE_OPENCV)
     list(APPEND Caffe_DEFINITIONS -DUSE_OPENCV)
   endif()
@@ -55,21 +51,15 @@ function(caffe_generate_export_configs)
 
   set(LMDB_IMPORTED OFF)
   if(USE_LMDB)
-    list(APPEND Caffe_DEFINITIONS -DUSE_LMDB)
-    if (ALLOW_LMDB_NOLOCK)
-        list(APPEND Caffe_DEFINITIONS -DALLOW_LMDB_NOLOCK)
-    endif()
     foreach(_lib ${LMDB_LIBRARIES})
       if(TARGET ${_lib})
         set(LMDB_IMPORTED ON)
       endif()
     endforeach()
   endif()
-
   set(LEVELDB_IMPORTED OFF)
   set(SNAPPY_IMPORTED OFF)
   if(USE_LEVELDB)
-    list(APPEND Caffe_DEFINITIONS -DUSE_LEVELDB)
     foreach(_lib ${LevelDB_LIBRARIES})
       if(TARGET ${_lib})
         set(LEVELDB_IMPORTED ON)
@@ -99,7 +89,7 @@ function(caffe_generate_export_configs)
   configure_file("cmake/Templates/CaffeConfig.cmake.in" "${PROJECT_BINARY_DIR}/CaffeConfig.cmake" @ONLY)
 
   # Add targets to the build-tree export set
-  export(TARGETS caffe proto FILE "${PROJECT_BINARY_DIR}/CaffeTargets.cmake")
+  export(TARGETS caffe caffeproto FILE "${PROJECT_BINARY_DIR}/CaffeTargets.cmake")
   export(PACKAGE Caffe)
 
   # ---[ Configure install-tree CaffeConfig.cmake file ]---

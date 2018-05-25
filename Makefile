@@ -12,7 +12,7 @@ ifeq ($(CPU_ONLY),1)
 	USE_GREENTEA := 0
 endif
 
-CXXFLAGS += -std=c++11 -Wno-deprecated-declarations
+CXXFLAGS += -std=c++11 -Wno-deprecated-declarations -w
 LINKFLAGS += -std=c++11 -Wno-deprecated-declarations
 NVCCFLAGS +=  -std=c++11 -Xcompiler "-Wno-deprecated-declarations -D__CORRECT_ISO_CPP11_MATH_H_PROTO" -Xlinker "-Wno-deprecated-declarations" -Xarchive "-Wno-deprecated-declarations" -Xnvlink "-Wno-deprecated-declarations"
 

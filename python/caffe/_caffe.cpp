@@ -51,14 +51,18 @@ const int NPY_DTYPE = NPY_FLOAT32;
 void set_mode_cpu() { Caffe::set_mode(Caffe::CPU); }
 void set_mode_gpu() { Caffe::set_mode(Caffe::GPU); }
 
-void InitLog(int level) {
-  FLAGS_logtostderr = 1;
-  FLAGS_minloglevel = level;
+void InitLog() {
   ::google::InitGoogleLogging("");
   ::google::InstallFailureSignalHandler();
 }
-void InitLogInfo() {
-  InitLog(google::INFO);
+void InitLogLevel(int level) {
+  FLAGS_minloglevel = level;
+  InitLog();
+}
+void InitLogLevelPipe(int level, bool stderr) {
+  FLAGS_minloglevel = level;
+  FLAGS_logtostderr = stderr;
+  InitLog();
 }
 void Log(const string& s) {
   LOG(INFO) << s;
@@ -288,7 +292,7 @@ void Solver_add_callback(Solver<Dtype> * solver, bp::object on_start,
 }
 
 // Seems boost cannot call the base method directly
-void Solver_add_nccl(SGDSolver<Dtype>* solver
+void Solver_add_nccl(Solver<Dtype>* solver
 #ifdef USE_NCCL
   , NCCL<Dtype>* nccl
 #endif
@@ -296,6 +300,10 @@ void Solver_add_nccl(SGDSolver<Dtype>* solver
 #ifdef USE_NCCL
   solver->add_callback(nccl);
 #endif
+}
+
+void share_weights(Solver<Dtype>* solver, Net<Dtype>* net) {
+  net->ShareTrainedLayersWith(solver->net().get());
 }
 
 template<typename Dtype>
@@ -339,6 +347,35 @@ class NCCL {
 };
 #endif
 
+bool HasNCCL() {
+#ifdef USE_NCCL
+  return true;
+#else
+  return false;
+#endif
+}
+
+#ifdef USE_NCCL
+bp::object NCCL_New_Uid() {
+  std::string uid = NCCL<Dtype>::new_uid();
+#if PY_MAJOR_VERSION >= 3
+  // Convert std::string to bytes so that Python does not
+  // try to decode the string using the current locale.
+
+  // Since boost 1.53 boost.python will convert str and bytes
+  // to std::string but will convert std::string to str. Here we
+  // force a bytes object to be returned. When this object
+  // is passed back to the NCCL constructor boost.python will
+  // correctly convert the bytes to std::string automatically
+  PyObject* py_uid = PyBytes_FromString(uid.c_str());
+  return bp::object(bp::handle<>(py_uid));
+#else
+  // automatic conversion is correct for python 2.
+  return bp::object(uid);
+#endif
+}
+#endif
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolveOverloads, Solve, 0, 1);
 
 BOOST_PYTHON_MODULE(_caffe) {
@@ -349,8 +386,10 @@ BOOST_PYTHON_MODULE(_caffe) {
 
   // Caffe utility functions
   bp::def("init_log", &InitLog);
-  bp::def("init_log", &InitLogInfo);
+  bp::def("init_log", &InitLogLevel);
+  bp::def("init_log", &InitLogLevelPipe);
   bp::def("log", &Log);
+  bp::def("has_nccl", &HasNCCL);
   bp::def("set_mode_cpu", &set_mode_cpu);
   bp::def("set_mode_gpu", &set_mode_gpu);
   bp::def("set_random_seed", &set_random_seed);
@@ -377,7 +416,7 @@ BOOST_PYTHON_MODULE(_caffe) {
     .def("reshape", &Net<Dtype>::Reshape)
     .def("clear_param_diffs", &Net<Dtype>::ClearParamDiffs)
     // The cast is to select a particular overload.
-    .def("copy_from", static_cast<void (Net<Dtype>::*)(const string)>(
+    .def("copy_from", static_cast<void (Net<Dtype>::*)(const string&)>(
         &Net<Dtype>::CopyTrainedLayersFrom))
     .def("share_with", &Net<Dtype>::ShareTrainedLayersWith)
     .add_property("_blob_loss_weights", bp::make_function(
@@ -425,6 +464,14 @@ BOOST_PYTHON_MODULE(_caffe) {
     .add_property("count",    static_cast<int (Blob<Dtype>::*)() const>(
         &Blob<Dtype>::count))
     .def("reshape",           bp::raw_function(&Blob_Reshape))
+#ifndef CPU_ONLY
+    .add_property("_gpu_data_ptr",
+        reinterpret_cast<uintptr_t (Blob<Dtype>::*)()>(
+          &Blob<Dtype>::mutable_gpu_data))
+    .add_property("_gpu_diff_ptr",
+        reinterpret_cast<uintptr_t (Blob<Dtype>::*)()>(
+          &Blob<Dtype>::mutable_gpu_diff))
+#endif
     .add_property("data",     bp::make_function(&Blob<Dtype>::mutable_cpu_data,
           NdarrayCallPolicies()))
     .add_property("diff",     bp::make_function(&Blob<Dtype>::mutable_cpu_diff,
@@ -443,7 +490,9 @@ BOOST_PYTHON_MODULE(_caffe) {
   bp::class_<SolverParameter>("SolverParameter", bp::no_init)
     .add_property("max_iter", &SolverParameter::max_iter)
     .add_property("display", &SolverParameter::display)
-    .add_property("layer_wise_reduce", &SolverParameter::layer_wise_reduce);
+    .add_property("layer_wise_reduce", &SolverParameter::layer_wise_reduce)
+    .add_property("base_lr", &SolverParameter::base_lr,
+           &SolverParameter::set_base_lr);
   bp::class_<LayerParameter>("LayerParameter", bp::no_init);
 
   bp::class_<Solver<Dtype>, shared_ptr<Solver<Dtype> >, boost::noncopyable>(
@@ -459,26 +508,29 @@ BOOST_PYTHON_MODULE(_caffe) {
     .def("step", &Solver<Dtype>::Step)
     .def("restore", &Solver<Dtype>::Restore)
     .def("snapshot", &Solver<Dtype>::Snapshot)
+    .def("share_weights", &share_weights)
+    .def("apply_update", &Solver<Dtype>::ApplyUpdate)
     .add_property("param", bp::make_function(&Solver<Dtype>::param,
-              bp::return_value_policy<bp::copy_const_reference>()));
+              bp::return_internal_reference<>()));
   BP_REGISTER_SHARED_PTR_TO_PYTHON(Solver<Dtype>);
 
   bp::class_<SGDSolver<Dtype>, bp::bases<Solver<Dtype> >,
     shared_ptr<SGDSolver<Dtype> >, boost::noncopyable>(
-        "SGDSolver", bp::init<string>());
-  bp::class_<NesterovSolver<Dtype>, bp::bases<Solver<Dtype> >,
+        "SGDSolver", bp::init<string>())
+        .add_property("lr", &SGDSolver<Dtype>::GetLearningRate);
+  bp::class_<NesterovSolver<Dtype>, bp::bases<SGDSolver<Dtype> >,
     shared_ptr<NesterovSolver<Dtype> >, boost::noncopyable>(
         "NesterovSolver", bp::init<string>());
-  bp::class_<AdaGradSolver<Dtype>, bp::bases<Solver<Dtype> >,
+  bp::class_<AdaGradSolver<Dtype>, bp::bases<SGDSolver<Dtype> >,
     shared_ptr<AdaGradSolver<Dtype> >, boost::noncopyable>(
         "AdaGradSolver", bp::init<string>());
-  bp::class_<RMSPropSolver<Dtype>, bp::bases<Solver<Dtype> >,
+  bp::class_<RMSPropSolver<Dtype>, bp::bases<SGDSolver<Dtype> >,
     shared_ptr<RMSPropSolver<Dtype> >, boost::noncopyable>(
         "RMSPropSolver", bp::init<string>());
-  bp::class_<AdaDeltaSolver<Dtype>, bp::bases<Solver<Dtype> >,
+  bp::class_<AdaDeltaSolver<Dtype>, bp::bases<SGDSolver<Dtype> >,
     shared_ptr<AdaDeltaSolver<Dtype> >, boost::noncopyable>(
         "AdaDeltaSolver", bp::init<string>());
-  bp::class_<AdamSolver<Dtype>, bp::bases<Solver<Dtype> >,
+  bp::class_<AdamSolver<Dtype>, bp::bases<SGDSolver<Dtype> >,
     shared_ptr<AdamSolver<Dtype> >, boost::noncopyable>(
         "AdamSolver", bp::init<string>());
 
@@ -508,7 +560,7 @@ BOOST_PYTHON_MODULE(_caffe) {
     boost::noncopyable>("NCCL",
                         bp::init<shared_ptr<Solver<Dtype> >, const string&>())
 #ifdef USE_NCCL
-    .def("new_uid", &NCCL<Dtype>::new_uid).staticmethod("new_uid")
+    .def("new_uid", NCCL_New_Uid).staticmethod("new_uid")
     .def("bcast", &NCCL<Dtype>::Broadcast)
 #endif
     /* NOLINT_NEXT_LINE(whitespace/semicolon) */

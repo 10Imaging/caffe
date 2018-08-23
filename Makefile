@@ -45,7 +45,7 @@ COMMON_FLAGS += -DCAFFE_VERSION=$(DYNAMIC_VERSION_MAJOR).$(DYNAMIC_VERSION_MINOR
 # Get all source files
 ##############################
 # CXX_SRCS are the source files excluding the test ones.
-CXX_SRCS += $(shell find src/$(PROJECT) ! -name "test_*.cpp" -name "*.cpp")
+CXX_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cpp" -name "*.cpp")
 # CU_SRCS are the cuda source files
 CU_SRCS := $(shell find src/$(PROJECT) ! -name "test_*.cu" -name "*.cu")
 # TEST_SRCS are the test source files
@@ -175,7 +175,7 @@ INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
 ifneq ($(CPU_ONLY), 1)
 	INCLUDE_DIRS += $(CUDA_INCLUDE_DIR)
 	LIBRARY_DIRS += $(CUDA_LIB_DIR)
-	LIBRARIES += cudart cublas curand
+	LIBRARIES := cudart cublas curand
 endif
 
 LIBRARIES += glog gflags protobuf boost_system boost_filesystem m
@@ -183,6 +183,7 @@ LIBRARIES += glog gflags protobuf boost_system boost_filesystem m
 # handle IO dependencies
 USE_LEVELDB ?= 1
 USE_LMDB ?= 1
+# This code is taken from https://github.com/sh1r0/caffe-android-lib
 USE_HDF5 ?= 1
 USE_OPENCV ?= 1
 
@@ -192,6 +193,7 @@ endif
 ifeq ($(USE_LMDB), 1)
 	LIBRARIES += lmdb
 endif
+# This code is taken from https://github.com/sh1r0/caffe-android-lib
 ifeq ($(USE_HDF5), 1)
 	LIBRARIES += hdf5_hl hdf5
 endif
@@ -268,8 +270,6 @@ ifeq ($(LINUX), 1)
 	# We will also explicitly add stdc++ to the link target.
 	LIBRARIES += boost_thread stdc++
 	VERSIONFLAGS += -Wl,-soname,$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../lib
-	CXXFLAGS += -pthread
-	LINKFLAGS += -pthread
 endif
 
 # OS X:
@@ -290,7 +290,7 @@ ifeq ($(OSX), 1)
 		OSX_10_5_OR_LATER := $(shell [ $(OSX_MINOR_VERSION) -ge 5 ] && echo true)
 		ifeq ($(OSX_10_OR_LATER),true)
 			ifeq ($(OSX_10_5_OR_LATER),true)
-				LDFLAGS += -v -Wl,-rpath,$(CUDA_LIB_DIR)
+				LDFLAGS += -Wl,-rpath,$(CUDA_LIB_DIR)
 			endif
 		endif
 	endif
@@ -300,7 +300,7 @@ ifeq ($(OSX), 1)
 	LIBRARIES += boost_thread-mt
 	# we need to explicitly ask for the rpath to be obeyed
 	ORIGIN := @loader_path
-	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../$(BUILD_DIR)/lib
+	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../build/lib
 else
 	ORIGIN := \$$ORIGIN
 endif
@@ -353,6 +353,7 @@ ifeq ($(ALLOW_LMDB_NOLOCK), 1)
 	COMMON_FLAGS += -DALLOW_LMDB_NOLOCK
 endif
 endif
+# This code is taken from https://github.com/sh1r0/caffe-android-lib
 ifeq ($(USE_HDF5), 1)
 	COMMON_FLAGS += -DUSE_HDF5
 endif
@@ -420,11 +421,11 @@ CXXFLAGS += -MMD -MP
 
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
-CXXFLAGS += -fPIC $(COMMON_FLAGS) $(WARNINGS)
+CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 NVCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS)
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
-LINKFLAGS += -fPIC $(COMMON_FLAGS) $(WARNINGS)
+LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 
 USE_PKG_CONFIG ?= 0
 ifeq ($(USE_PKG_CONFIG), 1)
@@ -516,7 +517,7 @@ $(PY$(PROJECT)_SO): $(PY$(PROJECT)_SRC) $(PY$(PROJECT)_HXX) | $(DYNAMIC_NAME)
 	@ echo CXX/LD -o $@ $<
 	$(Q)$(CXX) -shared -o $@ $(PY$(PROJECT)_SRC) \
 		-o $@ $(LINKFLAGS) -l$(LIBRARY_NAME) $(PYTHON_LDFLAGS) \
-		-Wl,-rpath,$(ORIGIN)/../../$(BUILD_DIR)/lib
+		-Wl,-rpath,$(ORIGIN)/../../build/lib
 
 mat$(PROJECT): mat
 

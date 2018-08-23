@@ -256,38 +256,6 @@ void NCCL<Dtype>::on_gradients_ready() {
 }
 
 template<typename Dtype>
-void P2PSync<Dtype>::Prepare(const vector<int>& gpus,
-            vector<shared_ptr<P2PSync<Dtype> > >* syncs) {
-  // Pair devices for map-reduce synchronization
-  vector<DevicePair> pairs;
-  DevicePair::compute(gpus, &pairs);
-  ostringstream s;
-  for (int i = 1; i < pairs.size(); ++i) {
-    s << (i == 1 ? "" : ", ") << pairs[i].parent() << ":" << pairs[i].device();
-  }
-  LOG(INFO)<< "GPUs pairs " << s.str();
-
-  SolverParameter param(solver_->param());
-
-  // Build the GPU tree by finding the parent for each solver
-  for (int attempts = 0; attempts < pairs.size(); ++attempts) {
-    for (int i = 1; i < pairs.size(); ++i) {
-      if (!syncs->at(i).get()) {
-        P2PSync<Dtype>* parent = NULL;
-        for (int j = 0; j < syncs->size(); ++j) {
-          P2PSync<Dtype>* sync = j == 0 ? this : syncs->at(j).get();
-          if (sync) {
-            const SolverParameter& p = sync->solver()->param();
-            if (p.device_id() == pairs[i].parent()) {
-              parent = sync;
-            }
-          }
-        }
-        if (parent) {
-          param.set_device_id(pairs[i].device());
-          syncs->at(i).reset(new P2PSync<Dtype>(solver_, parent, param));
-          parent->children_.push_back((P2PSync<Dtype>*) syncs->at(i).get());
-        }
 class Worker : public InternalThread {
  public:
   explicit Worker(shared_ptr<Solver<Dtype> > rank0, int device,
@@ -348,12 +316,6 @@ class Worker : public InternalThread {
     }
 #endif
   }
-}
-
-template<typename Dtype>
-void P2PSync<Dtype>::Run(const vector<int>& gpus) {
-  vector<shared_ptr<P2PSync<Dtype> > > syncs(gpus.size());
-  Prepare(gpus, &syncs);
 
   shared_ptr<Solver<Dtype> > rank0_;
   int device_;

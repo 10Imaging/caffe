@@ -1,5 +1,5 @@
-FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
-LABEL maintainer victor@10imaging.com
+FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
+LABEL maintainer caffe-maint@googlegroups.com
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
@@ -27,16 +27,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV CAFFE_ROOT=/opt/caffe
 WORKDIR $CAFFE_ROOT
 
-# ENV CLONE_TAG should be set in Docker cloud
-ENV CLONE_TAG=master
+# FIXME: use ARG instead of ENV once DockerHub supports this
+# https://github.com/docker/hub-feedback/issues/460
+ENV CLONE_TAG=1.0
 
-RUN git clone -b ${CLONE_TAG} --depth 1 https://github.com/10imaging/caffe.git . && \
+RUN git clone -b ${CLONE_TAG} --depth 1 https://github.com/BVLC/caffe.git . && \
     pip install --upgrade pip && \
     cd python && for req in $(cat requirements.txt) pydot; do pip install $req; done && cd .. && \
-#    git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
+    git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
     mkdir build && cd build && \
-#    cmake -DUSE_CUDNN=1 -DUSE_NCCL=1 .. && \
-    cmake -DUSE_CUDNN=1 .. && \
+    cmake -DUSE_CUDNN=1 -DUSE_NCCL=1 .. && \
     make -j"$(nproc)"
 
 ENV PYCAFFE_ROOT $CAFFE_ROOT/python

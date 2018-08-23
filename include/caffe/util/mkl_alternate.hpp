@@ -83,8 +83,6 @@ DEFINE_VSL_BINARY_FUNC(Sub, y[i] = a[i] - b[i])
 DEFINE_VSL_BINARY_FUNC(Mul, y[i] = a[i] * b[i])
 DEFINE_VSL_BINARY_FUNC(Div, y[i] = a[i] / b[i])
 
-#ifndef USE_EIGEN
-
 // In addition, MKL comes with an additional function axpby that is not present
 // in standard blas. We will simply use a two-step (inefficient, of course) way
 // to mimic that.
@@ -100,8 +98,6 @@ inline void cblas_daxpby(const int N, const double alpha, const double* X,
   cblas_dscal(N, beta, Y, incY);
   cblas_daxpy(N, alpha, X, incX, Y, incY);
 }
-
-#endif  // USE_EIGEN
 
 #endif  // USE_MKL
 #endif  // CAFFE_UTIL_MKL_ALTERNATE_H_

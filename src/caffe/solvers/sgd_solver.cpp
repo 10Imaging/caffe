@@ -289,6 +289,7 @@ void SGDSolver<Dtype>::SnapshotSolverStateToBinaryProto(
 template <typename Dtype>
 void SGDSolver<Dtype>::SnapshotSolverStateToHDF5(
     const string& model_filename) {
+// This code is taken from https://github.com/sh1r0/caffe-android-lib
 #ifdef USE_HDF5
   string snapshot_filename =
       Solver<Dtype>::SnapshotFilename(".solverstate.h5");
@@ -311,6 +312,7 @@ void SGDSolver<Dtype>::SnapshotSolverStateToHDF5(
   }
   H5Gclose(history_hid);
   H5Fclose(file_hid);
+// This code is taken from https://github.com/sh1r0/caffe-android-lib
 #else
   LOG(FATAL) << "SnapshotSolverStateToHDF5 requires hdf5;"
              << " compile with USE_HDF5.";

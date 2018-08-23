@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/BVLC/caffe.svg?branch=master)](https://travis-ci.org/BVLC/caffe)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2F10imaging%2Fcaffe.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2F10imaging%2Fcaffe?ref=badge_shield)
 
 Caffe is a deep learning framework made with expression, speed, and modularity in mind.
 It is developed by Berkeley AI Research ([BAIR](http://bair.berkeley.edu))/The Berkeley Vision and Learning Center (BVLC) and community contributors.
@@ -44,6 +43,3 @@ Please cite Caffe in your publications if it helps your research:
       Title = {Caffe: Convolutional Architecture for Fast Feature Embedding},
       Year = {2014}
     }
-
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2F10imaging%2Fcaffe.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2F10imaging%2Fcaffe?ref=badge_large)

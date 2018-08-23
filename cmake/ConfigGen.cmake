@@ -36,19 +36,11 @@ function(caffe_generate_export_configs)
     list(APPEND Caffe_DEFINITIONS -DUSE_HDF5)
   endif()
 
-  if(USE_HDF5)
-    list(APPEND Caffe_DEFINITIONS -DUSE_HDF5)
-  endif()
-
   if(NOT HAVE_CUDNN)
     set(HAVE_CUDNN FALSE)
   endif()
 
   # ---[ Configure build-tree CaffeConfig.cmake file ]---
-
-  if(BLAS STREQUAL "Eigen" OR BLAS STREQUAL "eigen")
-    list(APPEND Caffe_DEFINITIONS -DUSE_EIGEN)
-  endif()
 
   configure_file("cmake/Templates/CaffeConfig.cmake.in" "${PROJECT_BINARY_DIR}/CaffeConfig.cmake" @ONLY)
 
@@ -72,3 +64,5 @@ function(caffe_generate_export_configs)
   # configure_file(cmake/Templates/CaffeConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/CaffeConfigVersion.cmake" @ONLY)
   # install(FILES "${PROJECT_BINARY_DIR}/CaffeConfigVersion.cmake" DESTINATION ${install_cmake_suffix})
 endfunction()
+
+

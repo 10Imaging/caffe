@@ -855,6 +855,7 @@ void Net<Dtype>::ToProto(NetParameter* param, bool write_diff) const {
 
 template <typename Dtype>
 void Net<Dtype>::ToHDF5(const string& filename, bool write_diff) const {
+// This code is taken from https://github.com/sh1r0/caffe-android-lib
 #ifdef USE_HDF5
   hid_t file_hid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT,
       H5P_DEFAULT);
@@ -909,6 +910,7 @@ void Net<Dtype>::ToHDF5(const string& filename, bool write_diff) const {
     H5Gclose(diff_hid);
   }
   H5Fclose(file_hid);
+// This code is taken from https://github.com/sh1r0/caffe-android-lib
 #else
   LOG(FATAL) << "ToHDF5 requires hdf5; compile with USE_HDF5.";
 #endif  // USE_HDF5
